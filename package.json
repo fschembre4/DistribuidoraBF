@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "pdf-parse": "^2.4.5",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.19"
+  }
+}

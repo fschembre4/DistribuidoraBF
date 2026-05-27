@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Digital</title>
+    <link href="output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
+        }
+        @keyframes cartBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .whatsapp-pulse { animation: pulseGlow 2s ease-in-out infinite; }
+
+        .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+
+        .btn-press:active { transform: scale(0.93); }
+        .btn-press { transition: transform 0.1s ease; }
+
+        .logo-spin { transition: transform 0.4s ease; }
+        .logo-spin:hover { transform: scale(1.15) rotate(-15deg); }
+
+        .brand-tilt { transition: transform 0.2s ease-out; transform-style: preserve-3d; }
+        .brand-tilt-inner { transform-style: preserve-3d; }
+        .brand-tilt-inner h1 { transform: translateZ(30px); }
+        .brand-tilt-inner i { transform: translateZ(20px); }
+
+        @keyframes particleDrift {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            15% { opacity: 0.7; }
+            85% { opacity: 0.5; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
+        }
+        .spice-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleDrift linear infinite;
+        }
+
+        @keyframes taglineFade {
+            0%, 100% { opacity: 1; transform: translateY(0); }
+            25% { opacity: 0; transform: translateY(-4px); }
+            50% { opacity: 0; transform: translateY(4px); }
+            75% { opacity: 1; transform: translateY(0); }
+        }
+        #brand-tagline {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        #brand-tagline.cycling {
+            animation: taglineFade 3s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spice-particle { display: none !important; }
+            .brand-tilt { transform: none !important; }
+        }
+
+        .min-touch { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+        .cat-promo { box-shadow: 0 0 0 3px #f59e0b, 0 0 18px rgba(245,158,11,0.5) !important; }
+
+        @media (max-width: 640px) {
+            .toast-mobile { top: 5rem; }
+            .hide-mobile { display: none !important; }
+            .compact-cat { font-size: 0.75rem; padding: 0.5rem 0.75rem; }
+        }
+        .faicod-glow { transition: filter 0.4s ease; }
+        .faicod-glow:hover { filter: drop-shadow(0 0 8px #00e5ff) drop-shadow(0 0 20px rgba(0,229,255,0.4)); }
+        @keyframes aiPulse {
+            0%, 100% { text-shadow: 0 0 4px #00e5ff, 0 0 10px rgba(0,229,255,0.3); }
+            50% { text-shadow: 0 0 10px #00e5ff, 0 0 25px rgba(0,229,255,0.6), 0 0 40px rgba(0,229,255,0.2); }
+        }
+        .ai-pulse { animation: aiPulse 2s ease-in-out infinite; display: inline-block; }
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 font-sans relative">
+    <div id="toast-notification"
+        class="fixed top-6 right-6 toast-mobile bg-brand-600 text-white px-6 py-3 rounded-lg shadow-xl transform translate-x-[200%] transition-transform duration-300 z-[100] flex items-center">
+        <i class="fa-solid fa-check-circle mr-2"></i> ¡Agregado al carrito!
+    </div>
+    <a id="whatsapp-float-btn" href="https://wa.me/584144396707?text=Hola%20Distribuidora%20BF%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20productos" target="_blank"
+        class="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full shadow-lg hover:bg-green-600 flex items-center justify-center text-2xl z-40 whatsapp-pulse"><i
+            class="fa-brands fa-whatsapp"></i></a>
+
+    <div class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <header>
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div id="brand-container" class="flex flex-col cursor-pointer select-none relative" onclick="location.reload()" title="Recargar catálogo">
+                    <div id="brand-tilt" class="brand-tilt flex items-center">
+                        <div class="brand-tilt-inner flex items-center">
+                            <i class="fa-solid fa-box-open mr-2 logo-spin text-brand-700 dark:text-brand-400 text-xl md:text-2xl"></i>
+                            <h1 class="text-xl md:text-2xl font-bold text-brand-700 dark:text-brand-400">Distribuidora BF</h1>
+                        </div>
+                        <div id="brand-particles" class="absolute inset-0 -m-4 pointer-events-none"></div>
+                    </div>
+                    <div id="brand-tagline" class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 ml-1 mt-0.5 font-medium tracking-wide">Especias</div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <a href="/admin.html" title="Admin"
+                        class="text-gray-300 dark:text-gray-500 hover:text-brand-600 text-xs opacity-30 hover:opacity-100 transition-all min-touch rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                            class="fa-solid fa-lock"></i></a>
+                    <div class="hidden sm:flex bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 text-xs font-semibold">
+                        <button onclick="setListMode('mayor')" id="list-mayor"
+                            class="min-touch px-3 py-1.5 rounded-full bg-brand-600 text-white btn-press">Mayor</button>
+                        <button onclick="setListMode('detal')" id="list-detal"
+                            class="min-touch px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 btn-press">Detal</button>
+                    </div>
+                    <div class="hidden sm:flex bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 text-xs font-semibold">
+                        <button onclick="setPricingMode('DIVISA')" id="mode-divisa"
+                            class="min-touch px-3 py-1.5 rounded-full bg-brand-600 text-white btn-press">$USD</button>
+                        <button onclick="setPricingMode('BCV')" id="mode-bcv"
+                            class="min-touch px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 btn-press">BCV</button>
+                    </div>
+                    <button onclick="toggleDarkMode()" id="theme-toggle"
+                        class="min-touch text-gray-600 dark:text-yellow-400 hover:text-brand-600 text-xl rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                            class="fa-solid fa-moon"></i></button>
+                    <button onclick="openPrintView()" title="Imprimir catálogo"
+                        class="min-touch hide-mobile text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 text-xl rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                            class="fa-solid fa-print"></i></button>
+                    <button onclick="toggleCart()"
+                        class="relative bg-brand-600 text-white px-4 py-2 rounded-full hover:bg-brand-700"><i
+                            class="fa-solid fa-cart-shopping"></i><span id="cart-count"
+                            class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></button>
+                </div>
+            </div>
+            <div class="sm:hidden container mx-auto px-4 pb-6 flex items-center justify-between">
+                <div></div>
+                <div class="flex space-x-3">
+                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 flex text-xs font-semibold">
+                        <button onclick="setListMode('mayor')" id="list-mayor-mob"
+                            class="min-touch px-3 py-1.5 rounded-full bg-brand-600 text-white btn-press">Mayor</button>
+                        <button onclick="setListMode('detal')" id="list-detal-mob"
+                            class="min-touch px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 btn-press">Detal</button>
+                    </div>
+                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 flex text-xs font-semibold">
+                        <button onclick="setPricingMode('DIVISA')" id="mode-divisa-mob"
+                            class="min-touch px-3 py-1.5 rounded-full bg-brand-600 text-white btn-press">$USD</button>
+                        <button onclick="setPricingMode('BCV')" id="mode-bcv-mob"
+                            class="min-touch px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 btn-press">BCV</button>
+                    </div>
+                </div>
+                <button onclick="openPrintView()" title="Imprimir catálogo"
+                    class="min-touch text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 text-lg rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                        class="fa-solid fa-print"></i></button>
+            </div>
+        </header>
+
+        <div class="bg-gray-100 dark:bg-gray-900 shadow-md">
+            <div class="container mx-auto px-4 py-4 flex space-x-2">
+                <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Buscar producto..."
+                    class="flex-1 px-4 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                <div class="flex items-center space-x-1">
+                    <button onclick="sortProducts('price')" id="sort-price" title="Ordenar por precio"
+                        class="min-h-[44px] px-2 sm:px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                            class="fa-solid fa-arrow-up-short-wide text-xs"></i></button>
+                    <button onclick="sortProducts('alpha')" id="sort-alpha" title="Ordenar alfabético"
+                        class="min-h-[44px] px-2 sm:px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                            class="fa-solid fa-arrow-up-a-z text-xs"></i></button>
+                </div>
+                <select id="view-select" onchange="setView(this.value)"
+                    class="sm:hidden px-1 py-0.5 border dark:border-gray-600 rounded text-[10px] bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500">
+                    <option value="list">Lista</option>
+                    <option value="grid">Cuadro</option>
+                    <option value="table">Tabla</option>
+                </select>
+                <div class="hidden sm:flex bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 space-x-0.5">
+                    <button onclick="setView('grid')" id="btn-grid"
+                        class="view-btn min-touch p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"><i
+                            class="fa-solid fa-grip"></i></button>
+                    <button onclick="setView('list')" id="btn-list"
+                        class="view-btn min-touch p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"><i
+                            class="fa-solid fa-list"></i></button>
+                    <button onclick="setView('table')" id="btn-table"
+                        class="view-btn min-touch p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"><i
+                            class="fa-solid fa-table"></i></button>
+                </div>
+            </div>
+
+            <div class="container mx-auto px-4 py-2">
+                <select id="category-select" onchange="setCategory(this.value)"
+                    class="w-full sm:hidden px-4 py-3 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white appearance-none">
+                    <option value="Todos">Todas las categorías</option>
+                </select>
+                <div id="cat-buttons-mayor" class="hidden sm:flex flex-wrap gap-2">
+                    <button data-cat="Todos" onclick="setCategory('Todos')"
+                        class="filter-btn bg-brand-600 text-white px-4 py-2 rounded-full text-sm font-medium">Todos</button>
+                    <button data-cat="PROMOCIONES DE CONTADO" onclick="setCategory('PROMOCIONES DE CONTADO')"
+                        class="filter-btn cat-promo bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Promociones Contado</button>
+                    <button data-cat="ESPECIAS" onclick="setCategory('ESPECIAS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Especias</button>
+                    <button data-cat="CONDIMENTOS" onclick="setCategory('CONDIMENTOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Condimentos</button>
+                    <button data-cat="GRANOS Y SEMILLAS" onclick="setCategory('GRANOS Y SEMILLAS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Granos/Semillas</button>
+                    <button data-cat="QUIMICOS" onclick="setCategory('QUIMICOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Químicos</button>
+                    <button data-cat="FRUTOS SECOS" onclick="setCategory('FRUTOS SECOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Frutos Secos</button>
+                    <button data-cat="GELATINAS Y POLVO PARA HORNEAR" onclick="setCategory('GELATINAS Y POLVO PARA HORNEAR')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Gelatinas</button>
+                    <button data-cat="COLORANTES" onclick="setCategory('COLORANTES')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Colorantes</button>
+                    <button data-cat="ESENCIAS" onclick="setCategory('ESENCIAS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Esencias</button>
+                    <button data-cat="REPOSTERIA" onclick="setCategory('REPOSTERIA')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Repostería</button>
+                    <button data-cat="DELICATESES" onclick="setCategory('DELICATESES')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Delicateses</button>
+                    <button data-cat="ENLATADOS" onclick="setCategory('ENLATADOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Enlatados</button>
+                </div>
+                <div id="cat-buttons-detal" class="hidden sm:flex flex-wrap gap-2" style="display:none">
+                    <button data-cat="Todos" onclick="setCategory('Todos')"
+                        class="filter-btn bg-brand-600 text-white px-4 py-2 rounded-full text-sm font-medium">Todos</button>
+                    <button data-cat="ESPECIAS" onclick="setCategory('ESPECIAS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Especias</button>
+                    <button data-cat="CONDIMENTOS" onclick="setCategory('CONDIMENTOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Condimentos</button>
+                    <button data-cat="GRANOS Y SEMILLAS" onclick="setCategory('GRANOS Y SEMILLAS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Granos/Semillas</button>
+                    <button data-cat="QUIMICOS" onclick="setCategory('QUIMICOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Químicos</button>
+                    <button data-cat="FRUTOS SECOS" onclick="setCategory('FRUTOS SECOS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Frutos Secos</button>
+                    <button data-cat="GELATINAS Y POLVO PARA HORNEAR" onclick="setCategory('GELATINAS Y POLVO PARA HORNEAR')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Gelatinas</button>
+                    <button data-cat="COLORANTES" onclick="setCategory('COLORANTES')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Colorantes</button>
+                    <button data-cat="ESENCIAS" onclick="setCategory('ESENCIAS')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Esencias</button>
+                    <button data-cat="REPOSTERIA" onclick="setCategory('REPOSTERIA')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Repostería</button>
+                    <button data-cat="DELICATESES" onclick="setCategory('DELICATESES')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Delicateses</button>
+                    <button data-cat="ENLATADOS PIZCA" onclick="setCategory('ENLATADOS PIZCA')"
+                        class="filter-btn bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium">Enlatados Pizca</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main id="product-list"
+        class="container mx-auto px-4 pb-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></main>
+
+    <div id="quantity-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-11/12 max-w-sm shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-300 flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-product-name" class="text-xl font-bold text-gray-800 dark:text-white pr-8"></h3>
+            <p id="modal-product-presentation" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+
+            <!-- Mayor controls -->
+            <div id="modal-qty-mayor" class="mt-6 flex justify-center items-center space-x-6">
+                <button onclick="changeModalQuantity(-1)"
+                    class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white text-2xl font-bold hover:bg-gray-300 flex items-center justify-center">-</button>
+                <span id="modal-quantity"
+                    class="text-4xl font-bold text-price-light dark:text-price-dark w-12 text-center">1</span>
+                <button onclick="changeModalQuantity(1)"
+                    class="w-12 h-12 rounded-full bg-brand-600 text-white text-2xl font-bold hover:bg-brand-700 flex items-center justify-center">+</button>
+            </div>
+
+            <!-- Detal controls -->
+            <div id="modal-qty-detal" class="mt-6 hidden">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                    <button onclick="setDetalUnit('g')" id="detal-unit-g"
+                        class="px-4 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white">gr</button>
+                    <button onclick="setDetalUnit('kg')" id="detal-unit-kg"
+                        class="px-4 py-1.5 rounded-full text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700">kg</button>
+                </div>
+                    <div class="flex items-center justify-center space-x-2">
+                        <button onclick="changeDetalQty(-1)"
+                            class="w-10 h-10 shrink-0 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white text-lg font-bold hover:bg-gray-300 flex items-center justify-center">−</button>
+                        <div class="text-center">
+                            <input type="number" id="modal-qty-display" step="0.01" min="0" value="1"
+                                oninput="onDetalQtyEdit()"
+                                class="w-full max-w-[80px] text-center bg-transparent text-2xl font-bold text-price-light dark:text-price-dark outline-none focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <span id="modal-qty-unit-label" class="text-xs text-gray-400 block">kg</span>
+                    </div>
+                    <button onclick="changeDetalQty(1)"
+                        class="w-10 h-10 shrink-0 rounded-full bg-brand-600 text-white text-lg font-bold hover:bg-brand-700 flex items-center justify-center">+</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5 justify-center mt-3">
+                    <button onclick="setDetalQty(0.1,this)" class="qty-preset px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all">100g</button>
+                    <button onclick="setDetalQty(0.25,this)" class="qty-preset px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all">250g</button>
+                    <button onclick="setDetalQty(0.5,this)" class="qty-preset px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all">500g</button>
+                    <button onclick="setDetalQty(1,this)" class="qty-preset px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all bg-brand-600 text-white border-brand-600">1kg</button>
+                    <button onclick="setDetalQty(2,this)" class="qty-preset px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all">2kg</button>
+                    <button onclick="setDetalQty(5,this)" class="qty-preset px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all">5kg</button>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center">
+                <span class="text-sm text-gray-500 dark:text-gray-400">Subtotal</span>
+                <span id="modal-subtotal" class="text-xl font-bold text-price-light dark:text-price-dark">$0.00</span>
+            </div>
+            <button onclick="confirmAddToCart()"
+                class="mt-4 w-full py-3 rounded-full bg-brand-600 text-white font-bold text-base hover:bg-brand-700">Agregar</button>
+        </div>
+    </div>
+
+    <div id="cart-panel"
+        class="fixed top-0 right-0 h-full w-full md:w-96 bg-white dark:bg-gray-800 shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-4 bg-brand-600 text-white flex justify-between items-center">
+            <h2 class="text-xl font-bold">Mi Pedido</h2>
+            <div class="flex items-center space-x-4">
+                <button onclick="clearCart()" title="Limpiar carrito" class="text-white hover:text-red-200"><i
+                        class="fa-solid fa-trash"></i></button>
+                <button onclick="toggleCart()" class="text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-4 text-gray-800 dark:text-white"></div>
+        <div class="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div class="flex justify-between font-bold text-xl mb-1 text-gray-800 dark:text-white">
+                <span>Total:</span><span id="cart-total">$0.00</span>
+            </div>
+            <div id="cart-total-bs-row"
+                class="flex justify-between text-sm mb-2 text-gray-500 dark:text-gray-400 hidden">
+                <span>Total Bs.:</span><span id="cart-total-bs">Bs. 0,00</span>
+            </div>
+            <p id="min-order-msg" class="text-red-500 text-sm mb-4 hidden">Pedido mínimo de $50.00 no alcanzado.</p>
+            <button onclick="repeatLastOrder()" title="Repetir último pedido"
+                class="text-brand-600 dark:text-brand-400 hover:text-brand-800 text-xs mb-2 flex items-center gap-1 underline underline-offset-2 opacity-70 hover:opacity-100">
+                <i class="fa-solid fa-clock-rotate-right"></i> Repetir último pedido
+            </button>
+            <input type="text" id="customer-name" placeholder="Tu nombre (opcional)"
+                class="w-full p-2 border dark:border-gray-600 rounded mb-2 text-sm focus:ring-brand-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+            <textarea id="customer-note" rows="2" placeholder="Notas: Ej. Entrega en la puerta trasera..."
+                class="w-full p-2 border dark:border-gray-600 rounded mb-4 text-sm focus:ring-brand-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-800 dark:text-white"></textarea>
+            <button id="whatsapp-btn" onclick="generateWhatsAppLink()" disabled
+                class="w-full bg-gray-400 text-gray-700 py-3 rounded-lg text-lg font-bold cursor-not-allowed flex items-center justify-center"><i
+                    class="fa-brands fa-whatsapp mr-2"></i> Enviar Pedido</button>
+        </div>
+    </div>
+
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let currentCategory = "Todos"; let currentView = "list"; let currentSort = null; let selectedProductId = null; let modalQuantity = 1; const MIN_ORDER = 50.00;
+        let tasa_bcv = 0, diferencial = 0, pricingMode = 'DIVISA', currentList = localStorage.getItem('catalog_list') || 'mayor';
+
+        function initDarkMode() { const isDark = localStorage.getItem('darkMode') === 'true'; if (isDark) document.documentElement.classList.add('dark'); updateDarkModeIcon(); }
+        function toggleDarkMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('darkMode', document.documentElement.classList.contains('dark')); updateDarkModeIcon(); }
+        function updateDarkModeIcon() { const btn = document.getElementById('theme-toggle'); if (document.documentElement.classList.contains('dark')) btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"/></svg>'; else btn.innerHTML = '<i class="fa-solid fa-moon"></i>'; }
+        initDarkMode();
+
+        function getPublicPrice(p) { return p.precio * (1 + (p.utilidad || 0) / 100); }
+        function getBcvUsdPrice(p) { return getPublicPrice(p) * (1 + (diferencial || 0) / 100); }
+        function getBsPrice(p) { return getBcvUsdPrice(p) * (tasa_bcv || 0); }
+        function formatBs(n) { return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+        function fmtQty(n) { return n % 1 === 0 ? n.toString() : n.toFixed(2).replace(/\.?0+$/, ''); }
+        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); updateCartUI(); }
+        function updateToggleClasses() {
+            const els = (sel) => [...document.querySelectorAll(sel)];
+            els('#list-mayor, #list-mayor-mob').forEach(el => el.className = 'min-touch px-3 py-1.5 rounded-full btn-press ' + (currentList === 'mayor' ? 'bg-brand-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'));
+            els('#list-detal, #list-detal-mob').forEach(el => el.className = 'min-touch px-3 py-1.5 rounded-full btn-press ' + (currentList === 'detal' ? 'bg-brand-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'));
+            els('#mode-divisa, #mode-divisa-mob').forEach(el => el.className = 'min-touch px-3 py-1.5 rounded-full btn-press ' + (pricingMode === 'DIVISA' ? 'bg-brand-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'));
+            els('#mode-bcv, #mode-bcv-mob').forEach(el => el.className = 'min-touch px-3 py-1.5 rounded-full btn-press ' + (pricingMode === 'BCV' ? 'bg-brand-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'));
+        }
+
+        function setListMode(mode) {
+            if (mode === currentList) return;
+            currentList = mode;
+            localStorage.setItem('catalog_list', mode);
+            updateToggleClasses();
+            updateCartUI();
+            currentCategory = "Todos";
+            updateCategoryButtons();
+            initCatalog();
+        }
+
+        function setPricingMode(mode) {
+            pricingMode = mode;
+            updateToggleClasses();
+            renderProducts();
+            updateCartUI();
+        }
+
+        function renderProducts() {
+            const searchTerm = document.getElementById("search-input").value.toLowerCase();
+            const productList = document.getElementById("product-list");
+            productList.innerHTML = "";
+            if (currentView === 'grid') { productList.className = "container mx-auto px-4 pb-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"; }
+            else if (currentView === 'table') { productList.className = "container mx-auto px-4 pb-24 overflow-x-auto"; }
+            else { productList.className = "container mx-auto px-4 pb-24 grid grid-cols-1 gap-2"; }
+            let filteredProducts = products.filter(p => {
+                const matchCategory = currentCategory === "Todos" || p.categoria === currentCategory;
+                const matchSearch = p.nombre.toLowerCase().includes(searchTerm);
+                return matchCategory && matchSearch;
+            });
+            if (currentSort === 'precio-asc') filteredProducts.sort((a, b) => getPublicPrice(a) - getPublicPrice(b));
+            else if (currentSort === 'precio-desc') filteredProducts.sort((a, b) => getPublicPrice(b) - getPublicPrice(a));
+            else if (currentSort === 'alpha-az') filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            else if (currentSort === 'alpha-za') filteredProducts.sort((a, b) => b.nombre.localeCompare(a.nombre));
+
+            if (currentView === 'table') {
+                let tableHtml = `<div class="bg-white dark:bg-gray-800 rounded-lg shadow" style="max-height:calc(100vh - 200px);overflow:auto"><table class="w-full text-sm"><thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider sticky top-0 z-10"><tr>
+                    <th class="hidden sm:table-cell px-3 py-3 text-left font-medium w-10">#</th>
+                    <th class="px-3 py-3 text-left font-medium">Nombre</th>
+                    <th class="hidden sm:table-cell px-3 py-3 text-left font-medium">Empaque</th>
+                    <th class="hidden sm:table-cell px-3 py-3 text-left font-medium">Presentación</th>
+                    <th class="hidden md:table-cell px-3 py-3 text-left font-medium">Categoría</th>
+                    <th class="px-3 py-3 text-right font-medium">Precio</th>
+                    <th class="px-3 py-3 text-center font-medium w-16">Agregar</th>
+                </tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
+                filteredProducts.forEach(p => {
+                    const isDisabled = !p.disponible;
+                    const opacityClass = isDisabled ? "opacity-60" : "";
+                    const priceCol = pricingMode === 'DIVISA'
+                        ? `$${getPublicPrice(p).toFixed(2)}`
+                        : `$${getBcvUsdPrice(p).toFixed(2)} <span class="text-gray-400">| Bs. ${formatBs(getBsPrice(p))}</span>`;
+                    const label = p.etiqueta ? (p.etiqueta === 'Nuevo' ? ' 🟢Nuevo' : ' 🔴Oferta') : '';
+                    tableHtml += `<tr class="hover:bg-gray-50 dark:hover:bg-dark-rowHover ${opacityClass}">
+                        <td class="hidden sm:table-cell px-3 py-2.5 text-xs text-gray-400 font-mono">#${p.id}</td>
+                        <td class="px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-white">${p.nombre}${label}</td>
+                        <td class="hidden sm:table-cell px-3 py-2.5 text-xs">${p.empaque ? `<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">${p.empaque}</span>` : '<span class="text-gray-400">—</span>'}</td>
+                        <td class="hidden sm:table-cell px-3 py-2.5 text-xs text-gray-500 dark:text-gray-400">${p.presentacion}</td>
+                        <td class="hidden md:table-cell px-3 py-2.5 text-xs"><span class="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded-full">${p.categoria}</span></td>
+                        <td class="px-3 py-2.5 text-sm font-semibold text-price-light dark:text-price-dark text-right">${priceCol}</td>
+                        <td class="px-3 py-2.5 text-center">
+                            ${isDisabled ? '<span class="text-xs text-red-400">Agotado</span>' : `<button onclick="openModal(${p.id})" class="min-touch bg-brand-600 text-white w-10 h-10 rounded-full hover:bg-brand-700 text-sm flex items-center justify-center mx-auto btn-press"><i class="fa-solid fa-plus"></i></button>`}
+                        </td>
+                    </tr>`;
+                });
+                tableHtml += '</tbody></table></div>';
+                productList.innerHTML = tableHtml;
+                return;
+            }
+
+            filteredProducts.forEach(p => {
+                const isDisabled = !p.disponible;
+                let tagHtml = '';
+                if (p.etiqueta === 'Nuevo') tagHtml = `<span class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full z-10">Nuevo</span>`;
+                if (p.etiqueta === 'Oferta') tagHtml = `<span class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10">Oferta</span>`;
+                const btnClass = isDisabled ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed" : "bg-brand-600 text-white hover:bg-brand-700";
+                const btnAction = isDisabled ? "" : `onclick="openModal(${p.id})"`;
+                const opacityClass = isDisabled ? "opacity-60" : "";
+if (currentView === 'grid') {
+                    let priceHtml;
+                    if (pricingMode === 'DIVISA') {
+                        const usd = getPublicPrice(p);
+                        priceHtml = `<span class="text-2xl font-bold text-price-light dark:text-price-dark">$${usd.toFixed(2)}</span>`;
+                    } else {
+                        const usd = getBcvUsdPrice(p);
+                        const bs = getBsPrice(p);
+                        priceHtml = `<span class="text-2xl font-bold text-price-light dark:text-price-dark">$${usd.toFixed(2)}</span><br><span class="text-xs text-gray-500 dark:text-gray-400">Bs. ${formatBs(bs)}</span>`;
+                    }
+                    productList.innerHTML += `<div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex flex-col justify-between relative card-hover ${opacityClass}">${tagHtml}${isDisabled ? '<span class="absolute top-2 right-2 bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Agotado</span>' : ''}<div><div class="flex justify-between items-start mb-2 mt-${p.etiqueta ? '6' : '0'}"><span class="text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded-full">${p.categoria}</span>${p.empaque ? `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Empaque: ${p.empaque}</span>` : ''}<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Presentación: ${p.presentacion}</span></div><h3 class="text-lg font-semibold mt-2 text-gray-800 dark:text-white">${p.nombre}</h3></div><div class="mt-4 flex items-end justify-between"><div>${priceHtml}</div><button ${btnAction} class="${btnClass} px-4 py-2 rounded-full flex items-center justify-center text-sm font-semibold btn-press" ${isDisabled ? 'disabled' : ''}><i class="fa-solid fa-plus mr-2"></i> Agregar</button></div></div>`;
+                } else {
+                    let priceHtml;
+                    if (pricingMode === 'DIVISA') {
+                        const usd = getPublicPrice(p);
+                        priceHtml = `<span class="font-bold text-price-light dark:text-price-dark text-lg">$${usd.toFixed(2)}</span>`;
+                    } else {
+                        const usd = getBcvUsdPrice(p);
+                        const bs = getBsPrice(p);
+                        priceHtml = `<span class="font-bold text-price-light dark:text-price-dark text-lg">$${usd.toFixed(2)}</span><br><span class="text-xs text-gray-500 dark:text-gray-400">Bs. ${formatBs(bs)}</span>`;
+                    }
+                    productList.innerHTML += `<div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow flex items-center justify-between relative card-hover ${opacityClass}">${tagHtml}<div class="flex-1 pr-4 ${p.etiqueta ? 'ml-12' : ''}"><h3 class="font-semibold text-gray-800 dark:text-white">${p.nombre} ${isDisabled ? '<span class="text-red-500 text-xs">(Agotado)</span>' : ''}</h3><div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-1"><span><i class="fa-solid fa-tag"></i> ${p.categoria}</span>${p.empaque ? `<span class="text-amber-600 dark:text-amber-400 font-medium">Empaque: ${p.empaque}</span>` : ''}<span><i class="fa-solid fa-box-open"></i> Presentación: ${p.presentacion}</span></div></div><div class="flex items-center space-x-4"><div class="text-right">${priceHtml}</div><button ${btnAction} class="${btnClass} min-touch w-11 h-11 rounded-full flex items-center justify-center text-sm btn-press" ${isDisabled ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button></div></div>`;
+                }
+            });
+        }
+
+        function openModal(productId) {
+            selectedProductId = productId;
+            modalQuantity = 1;
+            const product = products.find(p => p.id === productId);
+            document.getElementById('modal-product-name').innerText = product.nombre;
+            const presStr = (product.empaque ? product.empaque + ' ' : '') + product.presentacion;
+            if (pricingMode === 'DIVISA') {
+                const usd = getPublicPrice(product);
+                document.getElementById('modal-product-presentation').innerHTML = `${presStr} — <span class="font-semibold">$${usd.toFixed(2)}</span> c/u`;
+            } else {
+                const usd = getBcvUsdPrice(product);
+                const bs = getBsPrice(product);
+                document.getElementById('modal-product-presentation').innerHTML = `${presStr} — <span class="font-semibold">$${usd.toFixed(2)}</span> <span class="text-gray-400">| Bs. ${formatBs(bs)}</span> c/u`;
+            }
+            // Show/hide controls based on list
+            const isDetal = currentList === 'detal';
+            document.getElementById('modal-qty-mayor').classList.toggle('hidden', isDetal);
+            document.getElementById('modal-qty-detal').classList.toggle('hidden', !isDetal);
+            if (isDetal) {
+                modalQuantity = 1;
+                detalUnit = 'kg';
+                setDetalUnit('kg');
+            } else {
+                document.getElementById('modal-quantity').innerText = '1';
+            }
+            modalQuantity = 1;
+            updateModalSubtotal();
+            document.getElementById('quantity-modal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('quantity-modal').classList.add('hidden'); }
+        function changeModalQuantity(change) {
+            modalQuantity += change;
+            if (modalQuantity < 1) modalQuantity = 1;
+            document.getElementById('modal-quantity').innerText = modalQuantity;
+            updateModalSubtotal();
+        }
+        let detalUnit = 'kg';
+        function setDetalUnit(unit) {
+            detalUnit = unit;
+            const active = 'px-4 py-1.5 rounded-full text-xs font-semibold bg-brand-600 text-white border border-brand-600';
+            const inactive = 'px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-500 hover:bg-gray-300 dark:hover:bg-gray-500';
+            document.getElementById('detal-unit-g').className = unit === 'g' ? active : inactive;
+            document.getElementById('detal-unit-kg').className = unit === 'kg' ? active : inactive;
+            updateDetalDisplay();
+        }
+        function updateDetalDisplay() {
+            const displayVal = detalUnit === 'g' ? modalQuantity * 1000 : modalQuantity;
+            document.getElementById('modal-qty-display').value = displayVal % 1 === 0 ? displayVal : displayVal.toFixed(1);
+            document.getElementById('modal-qty-unit-label').textContent = detalUnit === 'g' ? 'gr' : 'kg';
+        }
+        function onDetalQtyEdit() {
+            const val = parseFloat(document.getElementById('modal-qty-display').value);
+            if (!isNaN(val) && val >= 0) {
+                modalQuantity = detalUnit === 'g' ? val / 1000 : val;
+                document.querySelectorAll('#modal-qty-detal .qty-preset').forEach(b => b.classList.remove('bg-brand-600', 'text-white', 'border-brand-600'));
+                updateModalSubtotal();
+            }
+        }
+        function changeDetalQty(change) {
+            const step = detalUnit === 'g' ? 0.1 : 1;
+            modalQuantity = Math.round((modalQuantity + change * step) * 100) / 100;
+            if (modalQuantity < 0) modalQuantity = 0;
+            document.querySelectorAll('#modal-qty-detal .qty-preset').forEach(b => b.classList.remove('bg-brand-600', 'text-white', 'border-brand-600'));
+            updateDetalDisplay();
+            updateModalSubtotal();
+        }
+        function setDetalQty(val, el) {
+            modalQuantity = val;
+            document.querySelectorAll('#modal-qty-detal .qty-preset').forEach(b => b.classList.remove('bg-brand-600', 'text-white', 'border-brand-600'));
+            if (el) el.classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+            if (val < 1) { detalUnit = 'g'; setDetalUnit('g'); }
+            else { detalUnit = 'kg'; setDetalUnit('kg'); }
+            updateModalSubtotal();
+        }
+        function updateModalSubtotal() {
+            const product = products.find(p => p.id === selectedProductId);
+            if (pricingMode === 'DIVISA') {
+                const usd = getPublicPrice(product) * modalQuantity;
+                document.getElementById('modal-subtotal').textContent = `$${usd.toFixed(2)}`;
+            } else {
+                const usd = getBcvUsdPrice(product) * modalQuantity;
+                const bs = getBsPrice(product) * modalQuantity;
+                document.getElementById('modal-subtotal').innerHTML = `$${usd.toFixed(2)} <span class="text-sm font-normal text-gray-500">| Bs. ${formatBs(bs)}</span>`;
+            }
+        }
+
+        function confirmAddToCart() {
+            if (modalQuantity <= 0) return;
+            const product = products.find(p => p.id === selectedProductId);
+            const existingItem = cart.find(item => item.id === selectedProductId && item.list === currentList);
+            if (existingItem) { existingItem.quantity += modalQuantity; }
+            else { cart.push({ id: product.id, categoria: product.categoria, nombre: product.nombre, presentacion: product.presentacion, empaque: product.empaque, precio: getPublicPrice(product), quantity: modalQuantity, list: currentList }); }
+            saveCart(); closeModal(); showToast();
+        }
+        function getDisplayPrice(baseUsd) {
+            return pricingMode === 'DIVISA' ? baseUsd : baseUsd * (1 + (diferencial || 0) / 100);
+        }
+        function removeFromCart(productId, list) { cart = cart.filter(item => !(item.id === productId && item.list === list)); saveCart(); }
+        function clearCart() { if (confirm("¿Vaciar el carrito?")) { cart = []; saveCart(); } }
+
+        function updateCartUI() {
+            const cartCount = document.getElementById("cart-count");
+            const cartItemsDiv = document.getElementById("cart-items");
+            const cartTotalEl = document.getElementById("cart-total");
+            const cartTotalBsRow = document.getElementById("cart-total-bs-row");
+            const whatsappBtn = document.getElementById("whatsapp-btn");
+            const minOrderMsg = document.getElementById("min-order-msg");
+            let totalUSD = 0, count = 0;
+            cartItemsDiv.innerHTML = "";
+            const grupos = { mayor: [], detal: [] };
+            cart.forEach(item => {
+                totalUSD += item.precio * item.quantity;
+                count += item.quantity;
+                const list = item.list || 'mayor';
+                if (grupos[list]) grupos[list].push(item);
+                else grupos[list] = [item];
+            });
+            ['mayor', 'detal'].forEach(list => {
+                const items = grupos[list];
+                if (!items || items.length === 0) return;
+                const label = list === 'mayor' ? 'MAYOR' : 'DETAL';
+                cartItemsDiv.innerHTML += `<div class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b dark:border-gray-700 pb-1 mb-2 mt-2">── ${label} ──</div>`;
+                items.forEach(item => {
+                    const disp = getDisplayPrice(item.precio) * item.quantity;
+                    const removeBtn = `<button onclick="removeFromCart(${item.id},'${item.list || 'mayor'}')" class="text-red-500 hover:text-red-700 min-touch text-sm rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"><i class="fa-solid fa-trash"></i></button>`;
+                    if (pricingMode === 'DIVISA') {
+                        cartItemsDiv.innerHTML += `<div class="flex justify-between items-center border-b pb-2 mb-2 dark:border-gray-700"><div class="flex-1"><p class="font-semibold text-sm">${item.nombre}</p><p class="text-xs text-gray-500">${item.empaque ? item.empaque + ' ' : ''}${item.presentacion} x${fmtQty(item.quantity)}</p><p class="text-xs text-gray-400">$${disp.toFixed(2)}</p></div>${removeBtn}</div>`;
+                    } else {
+                        const bsItem = disp * (tasa_bcv || 0);
+                        cartItemsDiv.innerHTML += `<div class="flex justify-between items-center border-b pb-2 mb-2 dark:border-gray-700"><div class="flex-1"><p class="font-semibold text-sm">${item.nombre}</p><p class="text-xs text-gray-500">${item.empaque ? item.empaque + ' ' : ''}${item.presentacion} x${fmtQty(item.quantity)}</p><p class="text-xs text-gray-400">$${disp.toFixed(2)} <span class="text-gray-500">| Bs. ${formatBs(bsItem)}</span></p></div>${removeBtn}</div>`;
+                    }
+                });
+            });
+            const dispTotal = getDisplayPrice(totalUSD);
+            if (pricingMode === 'DIVISA') {
+                cartTotalEl.textContent = `$${dispTotal.toFixed(2)}`;
+                cartTotalBsRow.classList.add('hidden');
+            } else {
+                const totalBs = dispTotal * (tasa_bcv || 0);
+                cartTotalEl.textContent = `$${dispTotal.toFixed(2)}`;
+                document.getElementById('cart-total-bs').textContent = `Bs. ${formatBs(totalBs)}`;
+                cartTotalBsRow.classList.remove('hidden');
+            }
+            cartCount.innerText = count;
+            cartCount.classList.toggle("hidden", count === 0);
+            if (totalUSD >= MIN_ORDER) {
+                whatsappBtn.disabled = false;
+                whatsappBtn.className = "w-full bg-green-500 text-white py-3 rounded-lg text-lg font-bold hover:bg-green-600 flex items-center justify-center";
+                minOrderMsg.classList.add("hidden");
+            } else {
+                whatsappBtn.disabled = true;
+                whatsappBtn.className = "w-full bg-gray-400 text-gray-700 py-3 rounded-lg text-lg font-bold cursor-not-allowed flex items-center justify-center";
+                minOrderMsg.classList.remove("hidden");
+            }
+        }
+
+        function generateWhatsAppLink() {
+            const totalUSD = cart.reduce((sum, item) => sum + (item.precio * item.quantity), 0);
+            if (totalUSD < MIN_ORDER) return;
+            const phoneNumber = "584144396707";
+            const note = document.getElementById("customer-note").value;
+
+            // Guardar pedido en el servidor (fire & forget)
+            const clienteNombre = document.getElementById('customer-name').value.trim();
+            const itemsPayload = cart.map(i => {
+                const base = { id: i.id, nombre: i.nombre, presentacion: i.presentacion, empaque: i.empaque, precio: i.precio, quantity: i.quantity, list: i.list || 'mayor' };
+                if (pricingMode === 'BCV') {
+                    const bcvUsd = i.precio * (1 + (diferencial || 0) / 100);
+                    base.precio_bcv_usd = bcvUsd;
+                    base.precio_bs = bcvUsd * (tasa_bcv || 0);
+                }
+                return base;
+            });
+            const totalUsdBCV = totalUSD * (1 + (diferencial || 0) / 100);
+            const totalBs = totalUsdBCV * (tasa_bcv || 0);
+            fetch('/api/pedidos', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: itemsPayload, cliente: clienteNombre || 'Cliente', total_usd: totalUSD, total_bs: pricingMode === 'BCV' ? totalBs : 0, modo: pricingMode, nota: note, phone: phoneNumber })
+            }).catch(() => {});
+
+            if (pricingMode === 'DIVISA') {
+                let message = `¡Hola! Quiero hacer el siguiente pedido (Precios en DIVISA):\n\n`;
+                let lastList = '';
+                cart.forEach(item => {
+                    const itemList = item.list || 'mayor';
+                    if (itemList !== lastList) {
+                        message += `─── ${itemList === 'mayor' ? 'MAYOR' : 'DETAL'} ───\n`;
+                        lastList = itemList;
+                    }
+                    const sub = item.precio * item.quantity;
+                    message += `✅ ${fmtQty(item.quantity)} x ${item.nombre} (${item.empaque ? item.empaque + ' ' : ''}${item.presentacion}) - $${sub.toFixed(2)}\n`;
+                });
+                message += `\n💵 *Total USD: $${totalUSD.toFixed(2)}*`;
+                if (note.trim() !== "") message += `\n\n📝 *Notas:* ${note}`;
+                localStorage.setItem('lastOrder', JSON.stringify(cart));
+                window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+            } else {
+                let message = `¡Hola! Quiero hacer el siguiente pedido (Precios en BCV):\n\n`;
+                let lastList = '';
+                cart.forEach(item => {
+                    const itemList = item.list || 'mayor';
+                    if (itemList !== lastList) {
+                        message += `─── ${itemList === 'mayor' ? 'MAYOR' : 'DETAL'} ───\n`;
+                        lastList = itemList;
+                    }
+                    const subUsd = item.precio * item.quantity;
+                    const subBcvUsd = subUsd * (1 + (diferencial || 0) / 100);
+                    const subBs = subBcvUsd * (tasa_bcv || 0);
+                    message += `✅ ${fmtQty(item.quantity)} x ${item.nombre} (${item.empaque ? item.empaque + ' ' : ''}${item.presentacion})\n   $${subBcvUsd.toFixed(2)}  |  Bs. ${formatBs(subBs)}\n`;
+                });
+                message += `\n💵 *Total USD: $${totalUsdBCV.toFixed(2)}*`;
+                message += `\n🇻🇪 *Total Bs.: Bs. ${formatBs(totalBs)}*`;
+                if (note.trim() !== "") message += `\n\n📝 *Notas:* ${note}`;
+                localStorage.setItem('lastOrder', JSON.stringify(cart));
+                window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+            }
+        }
+        function repeatLastOrder() {
+            const lastOrder = JSON.parse(localStorage.getItem('lastOrder'));
+            if (!lastOrder) { alert("No tienes un pedido anterior guardado."); return; }
+            if (confirm("¿Cargar último pedido?")) {
+                cart = lastOrder.map(item => ({ ...item }));
+                saveCart();
+                const targetList = cart[0]?.list || 'mayor';
+                if (targetList !== currentList) setListMode(targetList);
+                else updateCartUI();
+                toggleCart();
+            }
+        }
+        function showToast() {
+            bounceCart();
+            const toast = document.getElementById("toast-notification");
+            toast.classList.remove("translate-x-[200%]");
+            toast.classList.add("translate-x-0");
+            setTimeout(() => { toast.classList.remove("translate-x-0"); toast.classList.add("translate-x-[200%]"); }, 1500);
+        }
+        function sortProducts(type) {
+            const priceModes = ['precio-asc', 'precio-desc'];
+            const alphaModes = ['alpha-az', 'alpha-za'];
+            const modes = type === 'price' ? priceModes : alphaModes;
+            const isPrice = type === 'price';
+            const inThisGroup = isPrice ? currentSort?.startsWith('precio') : currentSort?.startsWith('alpha');
+            const idx = inThisGroup ? modes.indexOf(currentSort) : -1;
+            currentSort = idx === -1 ? modes[0] : modes[(idx + 1) % modes.length];
+            const priceBtn = document.getElementById('sort-price');
+            const alphaBtn = document.getElementById('sort-alpha');
+            const baseBtn = 'min-h-[44px] px-2 sm:px-3 py-2 rounded-full text-xs font-medium';
+            priceBtn.className = baseBtn + ' border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700';
+            alphaBtn.className = baseBtn + ' border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700';
+            if (currentSort?.startsWith('precio')) {
+                priceBtn.className = baseBtn + ' border border-brand-500 dark:border-brand-400 text-brand-700 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30';
+                priceBtn.innerHTML = '<i class=\"fa-solid ' + (currentSort === 'precio-asc' ? 'fa-arrow-up-short-wide' : 'fa-arrow-down-wide-short') + ' text-xs\"></i>';
+            } else if (currentSort?.startsWith('alpha')) {
+                alphaBtn.className = baseBtn + ' border border-brand-500 dark:border-brand-400 text-brand-700 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30';
+                alphaBtn.innerHTML = '<i class=\"fa-solid ' + (currentSort === 'alpha-az' ? 'fa-arrow-up-a-z' : 'fa-arrow-down-z-a') + ' text-xs\"></i>';
+            }
+            renderProducts();
+        }
+
+        function updateCategoryButtons() {
+            const mayor = document.getElementById('cat-buttons-mayor');
+            const detal = document.getElementById('cat-buttons-detal');
+            const sel = document.getElementById('category-select');
+            const isDesktop = window.matchMedia('(min-width: 640px)').matches;
+            if (isDesktop) {
+                if (currentList === 'mayor') { mayor.style.display = 'flex'; detal.style.display = 'none'; }
+                else { mayor.style.display = 'none'; detal.style.display = 'flex'; }
+            } else {
+                mayor.style.display = ''; detal.style.display = '';
+            }
+            const cats = currentList === 'mayor'
+                ? ['PROMOCIONES DE CONTADO|Promociones Contado','ESPECIAS|Especias','CONDIMENTOS|Condimentos','GRANOS Y SEMILLAS|Granos y Semillas','QUIMICOS|Químicos','FRUTOS SECOS|Frutos Secos','GELATINAS Y POLVO PARA HORNEAR|Gelatinas y Polvos','COLORANTES|Colorantes','ESENCIAS|Esencias','REPOSTERIA|Repostería','DELICATESES|Delicateses','ENLATADOS|Enlatados']
+                : ['ESPECIAS|Especias','CONDIMENTOS|Condimentos','GRANOS Y SEMILLAS|Granos y Semillas','QUIMICOS|Químicos','FRUTOS SECOS|Frutos Secos','GELATINAS Y POLVO PARA HORNEAR|Gelatinas y Polvos','COLORANTES|Colorantes','ESENCIAS|Esencias','REPOSTERIA|Repostería','DELICATESES|Delicateses','ENLATADOS PIZCA|Enlatados Pizca'];
+            sel.innerHTML = '<option value="Todos">Todas las categorías</option>' + cats.map(c => `<option value="${c.split('|')[0]}">${c.split('|')[1]}</option>`).join('');
+            setCategory('Todos');
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                const btnCat = btn.getAttribute('data-cat');
+                if (btnCat === category) {
+                    btn.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-200');
+                    btn.classList.add('bg-brand-600', 'text-white');
+                } else {
+                    btn.classList.remove('bg-brand-600', 'text-white');
+                    btn.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-200');
+                }
+            });
+            const sel = document.getElementById('category-select');
+            if (sel) sel.value = category;
+            renderProducts();
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white');
+                btn.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+            });
+            const id = { grid: 'btn-grid', list: 'btn-list', table: 'btn-table' }[view];
+            const el = document.getElementById(id);
+            if (el) { el.classList.add('bg-brand-600', 'text-white'); }
+            const sel = document.getElementById('view-select');
+            if (sel) sel.value = view;
+            renderProducts();
+        }
+        function toggleCart() { document.getElementById("cart-panel").classList.toggle("translate-x-full"); }
+        function filterProducts() { renderProducts(); }
+
+        function openPrintView() {
+            const w = window.open('print.html?tipo=' + currentList, '_blank');
+            if (!w) alert('Permite las ventanas emergentes para abrir la vista de impresión');
+        }
+
+        async function initCatalog() {
+            updateToggleClasses();
+            try {
+                const [prodRes, configRes] = await Promise.all([
+                    fetch('/api/productos?tipo=' + currentList),
+                    fetch('/api/config')
+                ]);
+                if (prodRes.ok) {
+                    const apiProducts = await prodRes.json();
+                    window.products = apiProducts.map(p => ({
+                        id: p.id,
+                        categoria: p.categoria,
+                        nombre: p.nombre,
+                        empaque: p.empaque || '',
+                        presentacion: p.presentacion || '',
+                        precio: p.precio,
+                        utilidad: p.utilidad || 0,
+                        disponible: p.disponible,
+                        etiqueta: p.etiqueta || ''
+                    }));
+                }
+                if (configRes.ok) {
+                    const cfg = await configRes.json();
+                    tasa_bcv = cfg.tasa_bcv || 0;
+                    diferencial = cfg.diferencial || 0;
+                }
+            } catch (e) {
+                // Fallback a datos.js (ya cargado)
+            }
+            updateCategoryButtons();
+            updateCartUI();
+            setView(currentView);
+        }
+
+        function bounceCart() {
+            const btn = document.querySelector('[onclick="toggleCart()"]');
+            if (!btn) return;
+            btn.style.animation = 'cartBounce 0.3s ease 2';
+            setTimeout(() => btn.style.animation = '', 700);
+        }
+
+        // ─── Brand particles ───
+        (function() {
+            const container = document.getElementById('brand-particles');
+            if (!container) return;
+            const colors = ['#c9521b', '#d2691e', '#f59e0b', '#b8860b', '#cd5c5c', '#e67e22'];
+            for (let i = 0; i < 18; i++) {
+                const p = document.createElement('div');
+                p.className = 'spice-particle';
+                const size = 2 + Math.random() * 3;
+                const dx = (Math.random() - 0.5) * 120;
+                const dy = (Math.random() - 0.5) * 100;
+                const dur = 4 + Math.random() * 4;
+                const delay = Math.random() * 6;
+                p.style.cssText = `width:${size}px;height:${size}px;left:${10+Math.random()*80}%;top:${10+Math.random()*80}%;background:${colors[i%colors.length]};--dx:${dx}px;--dy:${dy}px;animation-duration:${dur}s;animation-delay:${delay}s`;
+                container.appendChild(p);
+            }
+        })();
+
+        // ─── 3D tilt on mouse ───
+        (function() {
+            const el = document.getElementById('brand-tilt');
+            if (!el) return;
+            let timeout;
+            el.addEventListener('mousemove', (e) => {
+                clearTimeout(timeout);
+                el.style.transition = 'transform 0.12s ease-out';
+                const rect = el.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                const tiltX = (y - 0.5) * -14;
+                const tiltY = (x - 0.5) * 14;
+                el.style.transform = `perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    el.style.transition = 'transform 0.5s cubic-bezier(.23,1,.32,1)';
+                    el.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+                }, 50);
+            });
+        })();
+
+        // ─── Tagline rotatorio ───
+        (function() {
+            const el = document.getElementById('brand-tagline');
+            if (!el) return;
+            const phrases = ['Especias', 'Condimentos', 'Granos', 'Frutos Secos', 'Químicos', 'Colorantes', 'Esencias'];
+            let idx = 0;
+            el.classList.add('cycling');
+            setInterval(() => {
+                idx = (idx + 1) % phrases.length;
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(4px)';
+                setTimeout(() => {
+                    el.textContent = phrases[idx];
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 350);
+            }, 2800);
+        })();
+
+        initCatalog();
+    </script>
+
+    <!-- FAQ -->
+    <section id="faq" class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-12 max-w-3xl text-center">
+            <button onclick="document.getElementById('faq-content').classList.toggle('hidden')" class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors text-sm font-medium">
+                <i class="fa-solid fa-question-circle"></i> Preguntas Frecuentes
+                <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" id="faq-chevron"></i>
+            </button>
+            <div id="faq-content" class="hidden mt-8 text-left space-y-2">
+                <details class="group bg-gray-100 dark:bg-gray-750 rounded-xl">
+                    <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none text-gray-800 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                        ¿Cuál es el pedido mínimo?
+                        <i class="fa-solid fa-chevron-down text-brand-600 text-sm transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="px-6 pb-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        El pedido mínimo es de <strong>$50 USD</strong> (o su equivalente en Bs. según la tasa BCV del momento).
+                    </div>
+                </details>
+                <details class="group bg-gray-100 dark:bg-gray-750 rounded-xl">
+                    <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none text-gray-800 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                        ¿Cómo comprar?
+                        <i class="fa-solid fa-chevron-down text-brand-600 text-sm transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="px-6 pb-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        Agrega los productos al carrito, completa tus datos y presiona "Enviar pedido por WhatsApp". Recibirás atención personalizada para confirmar tu orden.
+                    </div>
+                </details>
+                <details class="group bg-gray-100 dark:bg-gray-750 rounded-xl">
+                    <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none text-gray-800 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                        ¿Qué significa Mayor vs Detal?
+                        <i class="fa-solid fa-chevron-down text-brand-600 text-sm transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="px-6 pb-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        <strong>Mayor:</strong> precios por presentación al por mayor (sacos, cajas, bultos, tobos).<br>
+                        <strong>Detal:</strong> precios por fracción (kilo, gramo, galón, litro). Puedes mezclar productos de ambas listas en un mismo pedido.
+                    </div>
+                </details>
+
+                <details class="group bg-gray-100 dark:bg-gray-750 rounded-xl">
+                    <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none text-gray-800 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                        ¿Hacen envíos?
+                        <i class="fa-solid fa-chevron-down text-brand-600 text-sm transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="px-6 pb-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        Sí. Consulta las zonas de cobertura y tarifas de envío directamente con nuestro equipo vía WhatsApp.
+                    </div>
+                </details>
+                <details class="group bg-gray-100 dark:bg-gray-750 rounded-xl">
+                    <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none text-gray-800 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                        ¿Formas de pago?
+                        <i class="fa-solid fa-chevron-down text-brand-600 text-sm transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="px-6 pb-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        Aceptamos pago en divisas ($ USD) y transferencias en Bs. a la tasa BCV del día. Consulta otras modalidades con nuestro equipo.
+                    </div>
+                </details>
+                <details class="group bg-gray-100 dark:bg-gray-750 rounded-xl">
+                    <summary class="flex items-center justify-between px-6 py-4 cursor-pointer list-none text-gray-800 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
+                        ¿Puedo repetir un pedido anterior?
+                        <i class="fa-solid fa-chevron-down text-brand-600 text-sm transition-transform duration-200 group-open:rotate-180"></i>
+                    </summary>
+                    <div class="px-6 pb-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        Sí. Usa el enlace "Repetir último pedido" en el panel del carrito para cargar automáticamente los productos de tu orden anterior.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 dark:bg-black">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="flex flex-col items-center">
+                    <h3 class="text-xl font-bold text-white flex items-center mb-3">
+                        <i class="fa-solid fa-box-open text-brand-500 mr-2"></i> Distribuidora BF
+                    </h3>
+                    <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
+                        Distribución de especias, condimentos, granos, químicos y productos alimenticios para comercios y hogares. Mayor y detal.
+                    </p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <h4 class="text-white font-semibold mb-4 flex items-center justify-center">
+                        <i class="fa-solid fa-phone text-brand-500 mr-2 text-sm"></i> Contacto
+                    </h4>
+                    <ul class="space-y-3 text-sm">
+                        <li>
+                            <a href="tel:+584144396707" class="flex items-center justify-center text-gray-400 hover:text-brand-400 transition-colors">
+                                <i class="fa-solid fa-phone mr-3 w-4 text-brand-600"></i> +58 414-4396707
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://wa.me/584144396707" target="_blank" class="flex items-center justify-center text-gray-400 hover:text-brand-400 transition-colors">
+                                <i class="fa-brands fa-whatsapp mr-3 w-4 text-green-500"></i> WhatsApp
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex flex-col items-center">
+                    <h4 class="text-white font-semibold mb-4 flex items-center justify-center">
+                        <i class="fa-solid fa-link text-brand-500 mr-2 text-sm"></i> Enlaces
+                    </h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" onclick="document.querySelector('.container.mx-auto.px-4.py-4').scrollIntoView({behavior:'smooth'}); return false" class="text-gray-400 hover:text-brand-400 transition-colors">Catálogo</a></li>
+                        <li><a href="#faq" class="text-gray-400 hover:text-brand-400 transition-colors">Preguntas Frecuentes</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-10 pt-8 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-500">
+                <span>© 2026 Distribuidora BF. Todos los derechos reservados.</span>
+                <span class="mt-2 sm:mt-0">Powered by <strong class="faicod-glow"><span class="text-white dark:text-white">F</span><span class="ai-pulse" style="color:#00e5ff">Ai</span><span class="text-white dark:text-white">COD</span></strong></span>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

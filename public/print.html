@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Distribuidora BF</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #1a1a2e;
+            padding: 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0 10px;
+            border-bottom: 2px solid #c9521b;
+            margin-bottom: 20px;
+        }
+        .header h1 { font-size: 24px; color: #c9521b; }
+        .header p { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .header .date { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+        .category-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #c9521b;
+            padding: 8px 12px;
+            background: #eff6ff;
+            border-radius: 4px;
+            margin: 20px 0 10px;
+            page-break-after: avoid;
+        }
+        .price-note {
+            text-align: right;
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            page-break-inside: auto;
+        }
+        thead { display: table-header-group; }
+        tr { page-break-inside: avoid; }
+        th {
+            background: #c9521b;
+            color: white;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        th:last-child { text-align: right; }
+        th:nth-last-child(2) { text-align: right; }
+        td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        td:last-child { text-align: right; font-weight: 600; }
+        td:nth-last-child(2) { text-align: right; }
+        td:nth-last-child(3) { text-align: center; }
+        .unavailable { opacity: 0.4; }
+        .unavailable td { text-decoration: line-through; }
+        .tag-nuevo { color: #059669; font-weight: 600; }
+        .tag-oferta { color: #dc2626; font-weight: 600; }
+        .agotado-label { color: #9ca3af; font-style: italic; font-size: 10px; }
+        .id-col { color: #9ca3af; font-size: 10px; width: 40px; }
+        .cat-col { width: 140px; }
+        .pres-col { width: 100px; color: #6b7280; }
+        @media print {
+            body { padding: 10px; }
+            .category-title { break-inside: avoid; }
+            .no-print { display: none; }
+        }
+        @media screen {
+            body { max-width: 900px; margin: 0 auto; background: #f9fafb; }
+            table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Distribuidora BF</h1>
+        <p>Catálogo de productos — Lista de precios <strong id="list-label"></strong></p>
+        <div class="date" id="print-date"></div>
+    </div>
+
+    <div class="price-note" id="price-note">
+        Cargando...
+    </div>
+
+    <div id="content"></div>
+
+    <script>
+        let tasa_bcv = 0, diferencial = 0;
+        const MODE_PARAM = new URLSearchParams(location.search).get('mode') || 'BCV';
+        const CAT_PARAM = new URLSearchParams(location.search).get('cat') || '';
+        const TIPO_PARAM = new URLSearchParams(location.search).get('tipo') || 'mayor';
+
+        function getPublicPrice(p) { return p.precio * (1 + (p.utilidad || 0) / 100); }
+        function getBcvUsdPrice(p) { return getPublicPrice(p) * (1 + (diferencial || 0) / 100); }
+        function getBsPrice(p) { return getBcvUsdPrice(p) * (tasa_bcv || 0); }
+        function formatBs(n) { return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+        async function loadAndRender() {
+            document.getElementById('print-date').textContent = 'Generado: ' + new Date().toLocaleString('es-VE', { timeZone: 'America/Caracas', hour12: true });
+
+            try {
+                document.getElementById('list-label').textContent = TIPO_PARAM === 'detal' ? '(Detal)' : '(Mayor)';
+                const [prodRes, configRes] = await Promise.all([
+                    fetch('/api/productos?tipo=' + TIPO_PARAM),
+                    fetch('/api/config')
+                ]);
+                const apiProducts = prodRes.ok ? await prodRes.json() : [];
+                if (configRes.ok) {
+                    const cfg = await configRes.json();
+                    tasa_bcv = cfg.tasa_bcv || 0;
+                    diferencial = cfg.diferencial || 0;
+                }
+
+                document.getElementById('price-note').innerHTML = `Precios en Divisas <strong>$USD</strong> y en <strong>Bs.</strong> — Tasa BCV: <strong>Bs. ${tasa_bcv.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</strong>`;
+
+                const products = apiProducts.map(p => ({
+                    ...p,
+                    presentacion: ((p.empaque || '') + ' ' + (p.presentacion || '')).trim()
+                }));
+
+                const cats = [...new Set(products.map(p => p.categoria).filter(Boolean))].sort();
+                const filteredCats = CAT_PARAM ? cats.filter(c => c === CAT_PARAM) : cats;
+
+                let html = '';
+                filteredCats.forEach(cat => {
+                    const items = products.filter(p => p.categoria === cat);
+                    html += `<div class="category-title">${cat} (${items.length})</div>`;
+                    html += `<table><thead><tr>
+                        <th style="width:40px">#</th>
+                        <th>Producto</th>
+                        <th style="width:100px">Presentación</th>
+                        <th style="width:90px;text-align:center">Estado</th>
+                        <th style="width:90px;text-align:right">$ USD</th>
+                        ${MODE_PARAM === 'BCV' ? '<th style="width:100px;text-align:right">Bs.</th>' : ''}
+                    </tr></thead><tbody>`;
+                    items.forEach(p => {
+                        const isOff = !p.disponible;
+                        const usd = getPublicPrice(p);
+                        const bcvUsd = getBcvUsdPrice(p);
+                        const bs = getBsPrice(p);
+                        const estado = isOff ? '<span class="agotado-label">Agotado</span>'
+                            : p.etiqueta === 'Nuevo' ? '<span class="tag-nuevo">Nuevo</span>'
+                            : p.etiqueta === 'Oferta' ? '<span class="tag-oferta">Oferta</span>'
+                            : '<span class="tag-nuevo" style="color:#d1d5db">●</span>';
+                        html += `<tr class="${isOff ? 'unavailable' : ''}">
+                            <td class="id-col">${p.id}</td>
+                            <td>${p.nombre}</td>
+                            <td class="pres-col">${p.presentacion}</td>
+                            <td style="text-align:center">${estado}</td>
+                            <td>$${usd.toFixed(2)}</td>
+                            ${MODE_PARAM === 'BCV' ? `<td>Bs. ${formatBs(bs)}</td>` : ''}
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                });
+
+                document.getElementById('content').innerHTML = html;
+            } catch (e) {
+                document.getElementById('content').innerHTML = '<p style="color:red">Error al cargar el catálogo. Asegúrate de que el servidor esté corriendo.</p>';
+            }
+        }
+
+        loadAndRender();
+    </script>
+</body>
+</html>
