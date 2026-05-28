@@ -791,26 +791,34 @@ if (currentView === 'grid') {
             const cached = localStorage.getItem('catalog_cache');
             if (!cached) return null;
             try {
-                const { timestamp, products: cachedProducts, config: cachedConfig, list } = JSON.parse(cached);
-                if (Date.now() - timestamp > CACHE_TTL || list !== currentList) return null;
-                return { products: cachedProducts, config: cachedConfig };
+                const { timestamp, products, config } = JSON.parse(cached);
+                if (Date.now() - timestamp > CACHE_TTL) return null;
+                const listProducts = products[currentList];
+                if (!listProducts) return null;
+                return { products: listProducts, config, allProducts: products };
             } catch { return null; }
         }
 
-        function saveCachedData(products, config) {
+        function saveCachedData(allProducts, config) {
             try {
                 localStorage.setItem('catalog_cache', JSON.stringify({
                     timestamp: Date.now(),
-                    list: currentList,
-                    products: products.map(p => ({
-                        id: p.id, categoria: p.categoria, nombre: p.nombre,
-                        empaque: p.empaque || '', presentacion: p.presentacion || '',
-                        precio: p.precio, utilidad: p.utilidad || 0,
-                        disponible: p.disponible, etiqueta: p.etiqueta || ''
-                    })),
+                    products: {
+                        mayor: (allProducts.mayor || []).map(p => normalizeProduct(p)),
+                        detal: (allProducts.detal || []).map(p => normalizeProduct(p))
+                    },
                     config: { tasa_bcv: config.tasa_bcv || 0, diferencial: config.diferencial || 0 }
                 }));
             } catch {}
+        }
+
+        function normalizeProduct(p) {
+            return {
+                id: p.id, categoria: p.categoria, nombre: p.nombre,
+                empaque: p.empaque || '', presentacion: p.presentacion || '',
+                precio: p.precio, utilidad: p.utilidad || 0,
+                disponible: p.disponible, etiqueta: p.etiqueta || ''
+            };
         }
 
         async function initCatalog() {
@@ -823,7 +831,7 @@ if (currentView === 'grid') {
                 updateCategoryButtons();
                 updateCartUI();
                 setView(currentView);
-                // refresh in background
+                // refresh in background (fetch both lists)
                 fetchAndCacheFresh();
             } else {
                 await fetchAndCacheFresh();
@@ -832,27 +840,25 @@ if (currentView === 'grid') {
 
         async function fetchAndCacheFresh() {
             try {
-                const [prodRes, configRes] = await Promise.all([
-                    fetch('/api/productos?tipo=' + currentList),
+                const [mayorRes, detalRes, configRes] = await Promise.all([
+                    fetch('/api/productos?tipo=mayor'),
+                    fetch('/api/productos?tipo=detal'),
                     fetch('/api/config')
                 ]);
-                let products, config;
-                if (prodRes.ok) {
-                    const apiProducts = await prodRes.json();
-                    products = apiProducts.map(p => ({
-                        id: p.id, categoria: p.categoria, nombre: p.nombre,
-                        empaque: p.empaque || '', presentacion: p.presentacion || '',
-                        precio: p.precio, utilidad: p.utilidad || 0,
-                        disponible: p.disponible, etiqueta: p.etiqueta || ''
-                    }));
-                    window.products = products;
-                }
-                if (configRes.ok) {
-                    config = await configRes.json();
+                let mayor, detal, config;
+                if (mayorRes.ok) mayor = await mayorRes.json();
+                if (detalRes.ok) detal = await detalRes.json();
+                if (configRes.ok) config = await configRes.json();
+                const allProducts = {};
+                if (mayor) allProducts.mayor = mayor;
+                if (detal) allProducts.detal = detal;
+                const listProds = allProducts[currentList] || mayor || detal || [];
+                window.products = Array.isArray(listProds) ? listProds : [];
+                if (config) {
                     tasa_bcv = config.tasa_bcv || 0;
                     diferencial = config.diferencial || 0;
                 }
-                if (products && config) saveCachedData(products, config);
+                if (mayor && detal && config) saveCachedData(allProducts, config);
                 updateCategoryButtons();
                 updateCartUI();
                 setView(currentView);
