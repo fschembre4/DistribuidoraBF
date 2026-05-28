@@ -6,21 +6,60 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
+if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('[ERROR] Define SUPABASE_URL y SUPABASE_KEY en .env');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+const SB_HEADERS = {
+  apikey: SUPABASE_KEY,
+  Authorization: `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json'
+};
+
+async function sbGet(table, query = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const res = await fetch(url, { headers: SB_HEADERS });
+  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); throw err; }
+  return res.json();
+}
+
+async function sbGetSingle(table, query = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const res = await fetch(url, { headers: { ...SB_HEADERS, Accept: 'application/vnd.pgrst.object+json' } });
+  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); throw err; }
+  return res.json();
+}
+
+async function sbInsert(table, body) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`;
+  const res = await fetch(url, { method: 'POST', headers: { ...SB_HEADERS, Prefer: 'return=representation' }, body: JSON.stringify(body) });
+  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); throw err; }
+  const json = await res.json();
+  return Array.isArray(json) ? json[0] : json;
+}
+
+async function sbUpdate(table, body, query) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const res = await fetch(url, { method: 'PATCH', headers: { ...SB_HEADERS, Prefer: 'return=representation', Accept: 'application/vnd.pgrst.object+json' }, body: JSON.stringify(body) });
+  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); throw err; }
+  return res.json();
+}
+
+async function sbDelete(table, query) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const res = await fetch(url, { method: 'DELETE', headers: { ...SB_HEADERS, Prefer: 'return=representation', Accept: 'application/vnd.pgrst.object+json' } });
+  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); throw err; }
+  return res.json();
+}
 
 app.set('trust proxy', 1);
 app.use(helmet({
@@ -62,12 +101,7 @@ app.use('/api', authMiddleware);
 app.get('/api/productos', async (req, res) => {
   try {
     const tipo = req.query.tipo || 'mayor';
-    const { data, error } = await supabase
-      .from('productos')
-      .select('*')
-      .eq('lista', tipo)
-      .order('id');
-    if (error) { console.error('[Supabase productos error]', JSON.stringify(error)); throw error; }
+    const data = await sbGet('productos', `?select=*&lista=eq.${tipo}&order=id`);
     const mapped = data.map(p => ({
       id: p.ref_id,
       categoria: p.categoria,
@@ -88,13 +122,8 @@ app.get('/api/productos', async (req, res) => {
 app.get('/api/productos/:id', async (req, res) => {
   try {
     const tipo = req.query.tipo || 'mayor';
-    const { data, error } = await supabase
-      .from('productos')
-      .select('*')
-      .eq('lista', tipo)
-      .eq('ref_id', parseInt(req.params.id))
-      .single();
-    if (error || !data) return res.status(404).json({ error: 'Producto no encontrado' });
+    const data = await sbGetSingle('productos', `?select=*&lista=eq.${tipo}&ref_id=eq.${parseInt(req.params.id)}`);
+    if (!data) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json({
       id: data.ref_id,
       categoria: data.categoria,
@@ -114,13 +143,8 @@ app.get('/api/productos/:id', async (req, res) => {
 app.post('/api/productos', async (req, res) => {
   try {
     const tipo = req.query.tipo || 'mayor';
-    const { data: maxRow } = await supabase
-      .from('productos')
-      .select('ref_id')
-      .eq('lista', tipo)
-      .order('ref_id', { ascending: false })
-      .limit(1);
-    const newRefId = (maxRow?.[0]?.ref_id || 0) + 1;
+    const rows = await sbGet('productos', `?select=ref_id&lista=eq.${tipo}&order=ref_id.desc&limit=1`);
+    const newRefId = (rows?.[0]?.ref_id || 0) + 1;
     const product = {
       ref_id: newRefId,
       lista: tipo,
@@ -133,8 +157,7 @@ app.post('/api/productos', async (req, res) => {
       disponible: req.body.disponible !== undefined ? req.body.disponible : true,
       etiqueta: req.body.etiqueta || ''
     };
-    const { data, error } = await supabase.from('productos').insert(product).select().single();
-    if (error) throw error;
+    const data = await sbInsert('productos', product);
     res.status(201).json({
       id: data.ref_id,
       categoria: data.categoria,
@@ -165,14 +188,8 @@ app.put('/api/productos/:id', async (req, res) => {
     if (req.body.etiqueta !== undefined) updates.etiqueta = req.body.etiqueta;
     updates.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
-      .from('productos')
-      .update(updates)
-      .eq('lista', tipo)
-      .eq('ref_id', parseInt(req.params.id))
-      .select()
-      .single();
-    if (error || !data) return res.status(404).json({ error: 'Producto no encontrado' });
+    const data = await sbUpdate('productos', updates, `?lista=eq.${tipo}&ref_id=eq.${parseInt(req.params.id)}`);
+    if (!data) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json({
       id: data.ref_id,
       categoria: data.categoria,
@@ -192,14 +209,8 @@ app.put('/api/productos/:id', async (req, res) => {
 app.delete('/api/productos/:id', async (req, res) => {
   try {
     const tipo = req.query.tipo || 'mayor';
-    const { data, error } = await supabase
-      .from('productos')
-      .delete()
-      .eq('lista', tipo)
-      .eq('ref_id', parseInt(req.params.id))
-      .select()
-      .single();
-    if (error || !data) return res.status(404).json({ error: 'Producto no encontrado' });
+    const data = await sbDelete('productos', `?lista=eq.${tipo}&ref_id=eq.${parseInt(req.params.id)}`);
+    if (!data) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json({
       id: data.ref_id,
       categoria: data.categoria,
@@ -227,13 +238,8 @@ app.post('/api/productos/import', async (req, res) => {
     if (!valid) return res.status(400).json({ error: 'Cada producto debe tener nombre, categoria y precio' });
     const tipo = req.body.tipo || 'mayor';
 
-    const { data: maxRow } = await supabase
-      .from('productos')
-      .select('ref_id')
-      .eq('lista', tipo)
-      .order('ref_id', { ascending: false })
-      .limit(1);
-    let nextRefId = (maxRow?.[0]?.ref_id || 0) + 1;
+    const rows2 = await sbGet('productos', `?select=ref_id&lista=eq.${tipo}&order=ref_id.desc&limit=1`);
+    let nextRefId = (rows2?.[0]?.ref_id || 0) + 1;
 
     const rows = data.map(p => ({
       ref_id: nextRefId++,
@@ -248,8 +254,7 @@ app.post('/api/productos/import', async (req, res) => {
       etiqueta: p.etiqueta || ''
     }));
 
-    const { error } = await supabase.from('productos').insert(rows);
-    if (error) throw error;
+    await sbInsert('productos', rows);
     res.json({ ok: true, count: rows.length });
   } catch (err) {
     res.status(500).json({ error: 'Error al importar productos' });
@@ -260,8 +265,7 @@ app.post('/api/productos/import', async (req, res) => {
 
 app.get('/api/config', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('configuracion').select('*').eq('id', 1).single();
-    if (error) { console.error('[Supabase config error]', JSON.stringify(error)); throw error; }
+    const data = await sbGetSingle('configuracion', '?select=*&id=eq.1');
     res.json({
       tasa_bcv: data.tasa_bcv,
       diferencial: data.diferencial,
@@ -277,8 +281,7 @@ app.put('/api/config', async (req, res) => {
     const updates = { updated_at: new Date().toISOString() };
     if (req.body.tasa_bcv !== undefined) updates.tasa_bcv = parseFloat(req.body.tasa_bcv) || 0;
     if (req.body.diferencial !== undefined) updates.diferencial = parseFloat(req.body.diferencial) || 0;
-    const { data, error } = await supabase.from('configuracion').update(updates).eq('id', 1).select().single();
-    if (error) throw error;
+    const data = await sbUpdate('configuracion', updates, '?id=eq.1');
     res.json({
       tasa_bcv: data.tasa_bcv,
       diferencial: data.diferencial,
@@ -303,18 +306,12 @@ async function fetchTasas() {
 async function fetchAndSaveTasas() {
   const { oficial, paralelo } = await fetchTasas();
   const diferencial = parseFloat(((paralelo - oficial) / oficial * 100).toFixed(1));
-  const { data, error } = await supabase
-    .from('configuracion')
-    .update({
+  const data = await sbUpdate('configuracion', {
       tasa_bcv: oficial,
       diferencial,
       ultima_actualizacion: new Date().toISOString(),
       updated_at: new Date().toISOString()
-    })
-    .eq('id', 1)
-    .select()
-    .single();
-  if (error) throw error;
+    }, '?id=eq.1');
   return { oficial, paralelo, tasa_bcv: oficial, diferencial: data.diferencial, ultima_actualizacion: data.ultima_actualizacion };
 }
 
@@ -328,7 +325,7 @@ function iniciarAutoUpdate() {
     if (!AUTO_HOURS_VET.includes(horaVET)) return;
     if (minVET > 5) return;
     try {
-      const { data } = await supabase.from('configuracion').select('ultima_actualizacion').eq('id', 1).single();
+      const data = await sbGetSingle('configuracion', '?select=ultima_actualizacion&id=eq.1');
       if (data?.ultima_actualizacion) {
         const diffHours = (Date.now() - new Date(data.ultima_actualizacion).getTime()) / 3600000;
         if (diffHours < 3.5) return;
@@ -375,8 +372,7 @@ app.post('/api/diferencial/auto-actualizar', async (req, res) => {
 
 app.get('/api/diferencial/ultima', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('configuracion').select('*').eq('id', 1).single();
-    if (error) throw error;
+    const data = await sbGetSingle('configuracion', '?select=*&id=eq.1');
     res.json({
       tasa_bcv: data.tasa_bcv || 0,
       diferencial: data.diferencial || 0,
@@ -424,11 +420,7 @@ app.get('/api/auth/verificar', (req, res) => {
 
 app.get('/api/pedidos', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('pedidos')
-      .select('*, pedido_items(*)')
-      .order('id', { ascending: false });
-    if (error) throw error;
+    const data = await sbGet('pedidos', '?select=*,pedido_items(*)&order=id.desc');
     const mapped = data.map(p => ({
       id: p.id,
       phone: p.phone,
@@ -470,9 +462,7 @@ app.post('/api/pedidos', orderLimiter, async (req, res) => {
       lista: i.list === 'detal' ? 'detal' : 'mayor'
     }));
 
-    const { data: pedido, error: err1 } = await supabase
-      .from('pedidos')
-      .insert({
+    const pedido = await sbInsert('pedidos', {
         phone: (phone || '').replace(/[<>&"']/g, '').slice(0, 30),
         cliente: (cliente || 'Cliente').replace(/[<>&"']/g, '').slice(0, 100),
         total_usd: parseFloat(total_usd) || 0,
@@ -480,14 +470,10 @@ app.post('/api/pedidos', orderLimiter, async (req, res) => {
         modo: modo === 'BCV' ? 'BCV' : 'DIVISA',
         nota: (nota || '').replace(/[<>&"']/g, '').slice(0, 500),
         estado: 'Pendiente'
-      })
-      .select()
-      .single();
-    if (err1) throw err1;
+      });
 
     const itemsWithPedido = sanitizedItems.map(i => ({ ...i, pedido_id: pedido.id }));
-    const { error: err2 } = await supabase.from('pedido_items').insert(itemsWithPedido);
-    if (err2) throw err2;
+    await sbInsert('pedido_items', itemsWithPedido);
 
     res.status(201).json({
       id: pedido.id,
@@ -516,13 +502,8 @@ app.post('/api/pedidos', orderLimiter, async (req, res) => {
 
 app.put('/api/pedidos/:id/cliente', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('pedidos')
-      .update({ cliente: req.body.cliente, updated_at: new Date().toISOString() })
-      .eq('id', parseInt(req.params.id))
-      .select()
-      .single();
-    if (error || !data) return res.status(404).json({ error: 'Pedido no encontrado' });
+    const data = await sbUpdate('pedidos', { cliente: req.body.cliente, updated_at: new Date().toISOString() }, `?id=eq.${parseInt(req.params.id)}`);
+    if (!data) return res.status(404).json({ error: 'Pedido no encontrado' });
     res.json({ id: data.id, cliente: data.cliente });
   } catch {
     res.status(500).json({ error: 'Error al actualizar cliente' });
@@ -531,13 +512,8 @@ app.put('/api/pedidos/:id/cliente', async (req, res) => {
 
 app.put('/api/pedidos/:id/estado', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('pedidos')
-      .update({ estado: req.body.estado || 'Pendiente', updated_at: new Date().toISOString() })
-      .eq('id', parseInt(req.params.id))
-      .select()
-      .single();
-    if (error || !data) return res.status(404).json({ error: 'Pedido no encontrado' });
+    const data = await sbUpdate('pedidos', { estado: req.body.estado || 'Pendiente', updated_at: new Date().toISOString() }, `?id=eq.${parseInt(req.params.id)}`);
+    if (!data) return res.status(404).json({ error: 'Pedido no encontrado' });
     res.json({ id: data.id, estado: data.estado });
   } catch {
     res.status(500).json({ error: 'Error al actualizar estado' });
