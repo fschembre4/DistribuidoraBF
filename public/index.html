@@ -785,38 +785,83 @@ if (currentView === 'grid') {
             if (!w) alert('Permite las ventanas emergentes para abrir la vista de impresión');
         }
 
+        const CACHE_TTL = 60 * 60 * 1000; // 1 hora
+
+        function loadCachedData() {
+            const cached = localStorage.getItem('catalog_cache');
+            if (!cached) return null;
+            try {
+                const { timestamp, products: cachedProducts, config: cachedConfig, list } = JSON.parse(cached);
+                if (Date.now() - timestamp > CACHE_TTL || list !== currentList) return null;
+                return { products: cachedProducts, config: cachedConfig };
+            } catch { return null; }
+        }
+
+        function saveCachedData(products, config) {
+            try {
+                localStorage.setItem('catalog_cache', JSON.stringify({
+                    timestamp: Date.now(),
+                    list: currentList,
+                    products: products.map(p => ({
+                        id: p.id, categoria: p.categoria, nombre: p.nombre,
+                        empaque: p.empaque || '', presentacion: p.presentacion || '',
+                        precio: p.precio, utilidad: p.utilidad || 0,
+                        disponible: p.disponible, etiqueta: p.etiqueta || ''
+                    })),
+                    config: { tasa_bcv: config.tasa_bcv || 0, diferencial: config.diferencial || 0 }
+                }));
+            } catch {}
+        }
+
         async function initCatalog() {
             updateToggleClasses();
+            const cached = loadCachedData();
+            if (cached) {
+                window.products = cached.products;
+                tasa_bcv = cached.config.tasa_bcv;
+                diferencial = cached.config.diferencial;
+                updateCategoryButtons();
+                updateCartUI();
+                setView(currentView);
+                // refresh in background
+                fetchAndCacheFresh();
+            } else {
+                await fetchAndCacheFresh();
+            }
+        }
+
+        async function fetchAndCacheFresh() {
             try {
                 const [prodRes, configRes] = await Promise.all([
                     fetch('/api/productos?tipo=' + currentList),
                     fetch('/api/config')
                 ]);
+                let products, config;
                 if (prodRes.ok) {
                     const apiProducts = await prodRes.json();
-                    window.products = apiProducts.map(p => ({
-                        id: p.id,
-                        categoria: p.categoria,
-                        nombre: p.nombre,
-                        empaque: p.empaque || '',
-                        presentacion: p.presentacion || '',
-                        precio: p.precio,
-                        utilidad: p.utilidad || 0,
-                        disponible: p.disponible,
-                        etiqueta: p.etiqueta || ''
+                    products = apiProducts.map(p => ({
+                        id: p.id, categoria: p.categoria, nombre: p.nombre,
+                        empaque: p.empaque || '', presentacion: p.presentacion || '',
+                        precio: p.precio, utilidad: p.utilidad || 0,
+                        disponible: p.disponible, etiqueta: p.etiqueta || ''
                     }));
+                    window.products = products;
                 }
                 if (configRes.ok) {
-                    const cfg = await configRes.json();
-                    tasa_bcv = cfg.tasa_bcv || 0;
-                    diferencial = cfg.diferencial || 0;
+                    config = await configRes.json();
+                    tasa_bcv = config.tasa_bcv || 0;
+                    diferencial = config.diferencial || 0;
                 }
+                if (products && config) saveCachedData(products, config);
+                updateCategoryButtons();
+                updateCartUI();
+                setView(currentView);
             } catch (e) {
-                // Fallback a datos.js (ya cargado)
+                if (!window.products) window.products = [];
+                updateCategoryButtons();
+                updateCartUI();
+                setView(currentView);
             }
-            updateCategoryButtons();
-            updateCartUI();
-            setView(currentView);
         }
 
         function bounceCart() {
