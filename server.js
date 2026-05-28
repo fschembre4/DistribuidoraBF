@@ -20,7 +20,7 @@ if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
 
 app.set('trust proxy', 1);
 app.use(helmet({
@@ -67,7 +67,7 @@ app.get('/api/productos', async (req, res) => {
       .select('*')
       .eq('lista', tipo)
       .order('id');
-    if (error) throw error;
+    if (error) { console.error('[Supabase productos error]', JSON.stringify(error)); throw error; }
     const mapped = data.map(p => ({
       id: p.ref_id,
       categoria: p.categoria,
@@ -261,7 +261,7 @@ app.post('/api/productos/import', async (req, res) => {
 app.get('/api/config', async (req, res) => {
   try {
     const { data, error } = await supabase.from('configuracion').select('*').eq('id', 1).single();
-    if (error) throw error;
+    if (error) { console.error('[Supabase config error]', JSON.stringify(error)); throw error; }
     res.json({
       tasa_bcv: data.tasa_bcv,
       diferencial: data.diferencial,
