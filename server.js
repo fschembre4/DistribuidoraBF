@@ -28,7 +28,7 @@ const SB_HEADERS = {
 async function sbGet(table, query = '') {
   const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
   const res = await fetch(url, { headers: SB_HEADERS });
-  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); throw err; }
+  if (!res.ok) { const err = await res.json().catch(() => ({ message: res.statusText })); console.error('[SB]', url.slice(0,60)+'...', JSON.stringify(err)); throw err; }
   return res.json();
 }
 
@@ -95,6 +95,14 @@ function authMiddleware(req, res, next) {
   }
 }
 app.use('/api', authMiddleware);
+
+app.get('/api/debug', (req, res) => {
+  const urlOk = !!SUPABASE_URL;
+  const keyOk = !!SUPABASE_KEY;
+  const urlLen = SUPABASE_URL ? SUPABASE_URL.length : 0;
+  const keyLen = SUPABASE_KEY ? SUPABASE_KEY.length : 0;
+  res.json({ urlOk, urlLen, keyOk, keyLen, keyStart: keyOk ? SUPABASE_KEY.slice(0,10)+'...' : '' });
+});
 
 // ─── Productos ───────────────────────────────────────────────────────────────
 
