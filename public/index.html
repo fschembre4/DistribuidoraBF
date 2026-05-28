@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" style="overflow-x:hidden;width:100%;">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -390,7 +390,7 @@
             const productList = document.getElementById("product-list");
             productList.innerHTML = "";
             if (currentView === 'grid') { productList.className = "container mx-auto px-4 pb-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"; }
-            else if (currentView === 'table') { productList.className = "container mx-auto px-4 pb-24 overflow-x-auto"; }
+            else if (currentView === 'table') { productList.className = "container mx-auto px-4 pb-24 overflow-x-auto max-w-full"; }
             else { productList.className = "container mx-auto px-4 pb-24 grid grid-cols-1 gap-2"; }
             let filteredProducts = products.filter(p => {
                 const matchCategory = currentCategory === "Todos" || p.categoria === currentCategory;
@@ -403,14 +403,14 @@
             else if (currentSort === 'alpha-za') filteredProducts.sort((a, b) => b.nombre.localeCompare(a.nombre));
 
             if (currentView === 'table') {
-                let tableHtml = `<div class="bg-white dark:bg-gray-800 rounded-lg shadow" style="max-height:calc(100vh - 200px);overflow:auto"><table class="w-full text-sm"><thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider sticky top-0 z-10"><tr>
+                let tableHtml = `<div class="bg-white dark:bg-gray-800 rounded-lg shadow" style="max-height:calc(100vh - 200px);overflow:auto"><table class="w-full text-sm" style="table-layout:fixed"><thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider sticky top-0 z-10"><tr>
                     <th class="hidden sm:table-cell px-3 py-3 text-left font-medium w-10">#</th>
-                    <th class="px-3 py-3 text-left font-medium">Nombre</th>
+                    <th class="px-3 py-3 text-left font-medium w-[55%] sm:w-auto">Nombre</th>
                     <th class="hidden sm:table-cell px-3 py-3 text-left font-medium">Empaque</th>
                     <th class="hidden sm:table-cell px-3 py-3 text-left font-medium">Presentación</th>
-                    <th class="hidden md:table-cell px-3 py-3 text-left font-medium">Categoría</th>
-                    <th class="px-3 py-3 text-right font-medium">Precio</th>
-                    <th class="px-3 py-3 text-center font-medium w-16">Agregar</th>
+                    <th class="hidden md:table-cell px-3 py-3 text-left font-medium w-24">Categoría</th>
+                    <th class="px-3 py-3 text-right font-medium w-[25%] sm:w-24">Precio</th>
+                    <th class="px-3 py-3 text-center font-medium w-14">Agregar</th>
                 </tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
                 filteredProducts.forEach(p => {
                     const isDisabled = !p.disponible;
