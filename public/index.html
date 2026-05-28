@@ -436,6 +436,7 @@
                 return;
             }
 
+            let htmlParts = [];
             filteredProducts.forEach(p => {
                 const isDisabled = !p.disponible;
                 let tagHtml = '';
@@ -454,7 +455,7 @@ if (currentView === 'grid') {
                         const bs = getBsPrice(p);
                         priceHtml = `<span class="text-2xl font-bold text-price-light dark:text-price-dark">$${usd.toFixed(2)}</span><br><span class="text-xs text-gray-500 dark:text-gray-400">Bs. ${formatBs(bs)}</span>`;
                     }
-                    productList.innerHTML += `<div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex flex-col justify-between relative card-hover break-words ${opacityClass}">${tagHtml}${isDisabled ? '<span class="absolute top-2 right-2 bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Agotado</span>' : ''}<div><div class="flex justify-between items-start mb-2 mt-${p.etiqueta ? '6' : '0'}"><span class="text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded-full">${p.categoria}</span>${p.empaque ? `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Empaque: ${p.empaque}</span>` : ''}<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Presentación: ${p.presentacion}</span></div><h3 class="text-lg font-semibold mt-2 text-gray-800 dark:text-white break-words">${p.nombre}</h3></div><div class="mt-4 flex items-end justify-between"><div>${priceHtml}</div><button ${btnAction} class="${btnClass} px-4 py-2 rounded-full flex items-center justify-center text-sm font-semibold btn-press shrink-0" ${isDisabled ? 'disabled' : ''}><i class="fa-solid fa-plus mr-2"></i> Agregar</button></div></div>`;
+                    htmlParts.push(`<div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex flex-col justify-between relative card-hover break-words ${opacityClass}">${tagHtml}${isDisabled ? '<span class="absolute top-2 right-2 bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Agotado</span>' : ''}<div><div class="flex justify-between items-start mb-2 mt-${p.etiqueta ? '6' : '0'}"><span class="text-xs bg-brand-100 text-brand-800 px-2 py-1 rounded-full">${p.categoria}</span>${p.empaque ? `<span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">Empaque: ${p.empaque}</span>` : ''}<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Presentación: ${p.presentacion}</span></div><h3 class="text-lg font-semibold mt-2 text-gray-800 dark:text-white break-words">${p.nombre}</h3></div><div class="mt-4 flex items-end justify-between"><div>${priceHtml}</div><button ${btnAction} class="${btnClass} px-4 py-2 rounded-full flex items-center justify-center text-sm font-semibold btn-press shrink-0" ${isDisabled ? 'disabled' : ''}><i class="fa-solid fa-plus mr-2"></i> Agregar</button></div></div>`);
                 } else {
                     let priceHtml;
                     if (pricingMode === 'DIVISA') {
@@ -465,9 +466,10 @@ if (currentView === 'grid') {
                         const bs = getBsPrice(p);
                         priceHtml = `<span class="font-bold text-price-light dark:text-price-dark text-lg">$${usd.toFixed(2)}</span><br><span class="text-xs text-gray-500 dark:text-gray-400">Bs. ${formatBs(bs)}</span>`;
                     }
-                    productList.innerHTML += `<div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow flex items-center justify-between relative card-hover w-full ${opacityClass}">${tagHtml}<div class="flex-1 min-w-0 pr-4 ${p.etiqueta ? 'ml-12' : ''}"><h3 class="font-semibold text-gray-800 dark:text-white break-words">${p.nombre} ${isDisabled ? '<span class="text-red-500 text-xs">(Agotado)</span>' : ''}</h3><div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-1"><span><i class="fa-solid fa-tag"></i> ${p.categoria}</span>${p.empaque ? `<span class="text-amber-600 dark:text-amber-400 font-medium">Empaque: ${p.empaque}</span>` : ''}<span><i class="fa-solid fa-box-open"></i> Presentación: ${p.presentacion}</span></div></div><div class="flex items-center space-x-4 shrink-0"><div class="text-right">${priceHtml}</div><button ${btnAction} class="${btnClass} min-touch w-11 h-11 rounded-full flex items-center justify-center text-sm btn-press shrink-0" ${isDisabled ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button></div></div>`;
+                    htmlParts.push(`<div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow flex items-center justify-between relative card-hover w-full ${opacityClass}">${tagHtml}<div class="flex-1 min-w-0 pr-4 ${p.etiqueta ? 'ml-12' : ''}"><h3 class="font-semibold text-gray-800 dark:text-white break-words">${p.nombre} ${isDisabled ? '<span class="text-red-500 text-xs">(Agotado)</span>' : ''}</h3><div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-1"><span><i class="fa-solid fa-tag"></i> ${p.categoria}</span>${p.empaque ? `<span class="text-amber-600 dark:text-amber-400 font-medium">Empaque: ${p.empaque}</span>` : ''}<span><i class="fa-solid fa-box-open"></i> Presentación: ${p.presentacion}</span></div></div><div class="flex items-center space-x-4 shrink-0"><div class="text-right">${priceHtml}</div><button ${btnAction} class="${btnClass} min-touch w-11 h-11 rounded-full flex items-center justify-center text-sm btn-press shrink-0" ${isDisabled ? 'disabled' : ''}><i class="fa-solid fa-plus"></i></button></div></div>`);
                 }
             });
+            productList.innerHTML = htmlParts.join('');
         }
 
         function openModal(productId) {
@@ -794,8 +796,8 @@ if (currentView === 'grid') {
                 const { timestamp, products, config } = JSON.parse(cached);
                 if (Date.now() - timestamp > CACHE_TTL) return null;
                 const listProducts = products[currentList];
-                if (!listProducts) return null;
-                return { products: listProducts, config, allProducts: products };
+                if (!listProducts || listProducts.length === 0) return null;
+                return { products: listProducts, config: config || {}, allProducts: products };
             } catch { return null; }
         }
 
@@ -807,7 +809,7 @@ if (currentView === 'grid') {
                         mayor: (allProducts.mayor || []).map(p => normalizeProduct(p)),
                         detal: (allProducts.detal || []).map(p => normalizeProduct(p))
                     },
-                    config: { tasa_bcv: config.tasa_bcv || 0, diferencial: config.diferencial || 0 }
+                    config: config ? { tasa_bcv: config.tasa_bcv || 0, diferencial: config.diferencial || 0 } : null
                 }));
             } catch {}
         }
@@ -858,7 +860,7 @@ if (currentView === 'grid') {
                     tasa_bcv = config.tasa_bcv || 0;
                     diferencial = config.diferencial || 0;
                 }
-                if (mayor && detal && config) saveCachedData(allProducts, config);
+                if (mayor || detal) saveCachedData(allProducts, config);
                 updateCategoryButtons();
                 updateCartUI();
                 setView(currentView);
