@@ -2,5 +2,7 @@ node_modules/
 .env
 pedidos.json
 .Agent/
-
 server-test.log
+productos_mayor.json
+productos_detal.json
+ListasCostos/
