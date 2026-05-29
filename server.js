@@ -6,12 +6,6 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-let multer, PDFParse, VerbosityLevel, upload;
-function loadPDFDeps() {
-  if (!multer) multer = require('multer');
-  if (!PDFParse) { const p = require('pdf-parse'); PDFParse = p.PDFParse; VerbosityLevel = p.VerbosityLevel; }
-  if (!upload) upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
-}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -72,7 +66,9 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com"],
+      workerSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      childSrc: ["'self'", "https://cdnjs.cloudflare.com", "blob:"],
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
@@ -277,112 +273,7 @@ app.post('/api/productos/import', async (req, res) => {
   }
 });
 
-// ─── PDF Import ──────────────────────────────────────────────────────────────
 
-function parsePDFProducts(text) {
-  const lines = text.split('\n');
-  let listType = 'mayor';
-  const products = [];
-  let currentCategory = '';
-
-  // Detect list type: count columns in data lines
-  let count4 = 0, count5 = 0;
-  for (const line of lines) {
-    const cols = line.split('\t').map(c => c.trim());
-    if (cols.length >= 4 && /^\d+$/.test(cols[0])) {
-      if (cols.length === 5) count5++;
-      else if (cols.length === 4) count4++;
-      if (count4 >= 3 && count5 >= 3) break;
-    }
-  }
-  listType = count5 >= count4 ? 'mayor' : 'detal';
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    const cols = line.split('\t').map(c => c.trim());
-
-    // Category line: single column, all caps with possible spaces and accented chars
-    if (cols.length === 1 && /^[A-ZÁÉÍÓÚÑa-záéíóúñ\s]{3,40}$/.test(trimmed) && !/^\d/.test(trimmed) && !trimmed.includes('$')) {
-      currentCategory = trimmed;
-      continue;
-    }
-
-    // Data line: starts with a number
-    if (cols.length >= 4 && /^\d+$/.test(cols[0])) {
-      const name = cols[1];
-      if (!name) continue;
-
-      if (listType === 'detal') {
-        const presentacion = cols[2] || '';
-        const priceStr = cols[3] || '';
-        const price = parseFloat(priceStr.replace('$', '').replace(',', '')) || 0;
-        products.push({
-          categoria: currentCategory,
-          nombre: name,
-          empaque: '',
-          presentacion,
-          precio: price
-        });
-      } else {
-        const empaque = cols[2] || '';
-        const presentacion = cols[3] || '';
-        const priceStr = cols[4] || '';
-        const price = parseFloat(priceStr.replace('$', '').replace(',', '')) || 0;
-        products.push({
-          categoria: currentCategory,
-          nombre: name,
-          empaque,
-          presentacion,
-          precio: price
-        });
-      }
-    }
-  }
-
-  return { products, tipo: listType };
-}
-
-app.post('/api/productos/import-pdf', (req, res, next) => { try { loadPDFDeps(); next(); } catch { res.status(500).json({ error: 'Dependencias PDF no disponibles' }); } }, upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'Sube un archivo PDF' });
-    const pdf = new PDFParse({ data: req.file.buffer, verbosity: VerbosityLevel.ERRORS });
-    const result = await pdf.getText();
-    const parsed = parsePDFProducts(result.text);
-    if (!parsed.products.length) return res.status(400).json({ error: 'No se pudieron extraer productos del PDF. Verifica que sea un archivo de lista de precios A2.' });
-    res.json({ tipo: parsed.tipo, count: parsed.products.length, products: parsed.products });
-  } catch (err) {
-    res.status(400).json({ error: 'Error al leer PDF: ' + err.message });
-  }
-});
-
-app.post('/api/productos/import-pdf/confirm', async (req, res) => {
-  try {
-    const { tipo, products } = req.body;
-    if (!tipo || !products || !products.length) {
-      return res.status(400).json({ error: 'Datos inválidos' });
-    }
-    // Delete existing + insert new (PDF price = public price, DB = cost at 30% utility)
-    await fetch(`${SUPABASE_URL}/rest/v1/productos?lista=eq.${tipo}`, {
-      method: 'DELETE', headers: SB_HEADERS
-    });
-    const rows = products.map((p, i) => ({
-      ref_id: i + 1,
-      lista: tipo,
-      categoria: p.categoria,
-      nombre: p.nombre,
-      empaque: p.empaque || '',
-      presentacion: p.presentacion || '',
-      precio: parseFloat((p.precio / 1.30).toFixed(4)) || 0,
-      disponible: (parseFloat(p.precio) || 0) > 0,
-      utilidad: 30,
-      etiqueta: p.etiqueta || ''
-    }));
-    await sbInsert('productos', rows);
-    res.json({ ok: true, count: rows.length, tipo });
-  } catch (err) {
-    res.status(500).json({ error: 'Error al importar: ' + err.message });
-  }
-});
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 

@@ -10,3 +10,4 @@ ListasCostos/
 audit_*.js
 compare_*.js
 fetch_*.js
+test-*.js
