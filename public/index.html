@@ -96,7 +96,7 @@
     <div class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
         <header>
             <div class="container mx-auto px-4 py-2.5 flex justify-between items-center">
-                <div id="brand-container" class="flex flex-col cursor-pointer select-none relative" onclick="location.reload()" title="Recargar catálogo">
+                <div id="brand-container" class="flex flex-col cursor-pointer select-none relative" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">
                     <div id="brand-tilt" class="brand-tilt flex items-center">
                         <div class="brand-tilt-inner flex items-center">
                             <i class="fa-solid fa-box-open mr-2 logo-spin text-brand-700 dark:text-brand-400 text-lg sm:text-xl md:text-2xl"></i>
@@ -762,6 +762,7 @@ if (currentView === 'grid') {
             });
             const sel = document.getElementById('category-select');
             if (sel) sel.value = category;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             renderProducts();
         }
 
