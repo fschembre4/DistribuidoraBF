@@ -114,9 +114,17 @@
                         <button onclick="document.getElementById('json-input').click()" class="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 text-gray-700 dark:text-gray-200">
                             <i class="fa-solid fa-upload text-brand-500 w-4"></i> Importar Backup JSON
                         </button>
+                        <div class="border-t dark:border-gray-700 my-1"></div>
+                        <button onclick="document.getElementById('pdf-input').click()" class="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 text-gray-700 dark:text-gray-200">
+                            <i class="fa-solid fa-file-pdf text-red-500 w-4"></i> Importar PDF
+                        </button>
+                        <button onclick="exportProductosPDF()" class="w-full text-left px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 text-gray-700 dark:text-gray-200">
+                            <i class="fa-solid fa-file-pdf text-red-500 w-4"></i> Exportar PDF
+                        </button>
                     </div>
                     <input type="file" id="csv-input" accept=".csv" class="hidden" onchange="importCSV(event)">
                     <input type="file" id="json-input" accept=".json" class="hidden" onchange="importJSON(event)">
+                    <input type="file" id="pdf-input" accept=".pdf" class="hidden" onchange="importPDF(event)">
                 </div>
                 <button onclick="openConfigModal()" title="Configuración"
                     class="min-touch text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 text-lg rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 shrink-0">
@@ -366,6 +374,49 @@
                             class="flex-1 min-h-[44px] rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 btn-press">Guardar</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Import Preview Modal -->
+    <div id="pdf-preview-modal" class="fixed inset-0 z-[65] hidden">
+        <div class="absolute inset-0 bg-black/50 modal-bg" onclick="cerrarPreviewPDF()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+                <div class="p-4 border-b dark:border-gray-700 flex items-center justify-between shrink-0">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf text-red-500"></i> Vista Previa - Importar PDF
+                    </h2>
+                    <button onclick="cerrarPreviewPDF()" class="min-touch text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="pdf-preview-body" class="p-4 overflow-y-auto space-y-2">
+                    <div id="pdf-preview-info" class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300 mb-3"></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-2 py-2 text-left">#</th>
+                                    <th class="px-2 py-2 text-left">Nombre</th>
+                                    <th class="px-2 py-2 text-left">Categoría</th>
+                                    <th class="px-2 py-2 text-left">Empaque</th>
+                                    <th class="px-2 py-2 text-left">Presentación</th>
+                                    <th class="px-2 py-2 text-right">Precio Público $</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pdf-preview-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="p-4 border-t dark:border-gray-700 shrink-0 flex items-center justify-between gap-3">
+                    <div>
+                        <span id="pdf-preview-count" class="text-sm text-gray-600 dark:text-gray-300 font-medium"></span>
+                        <span class="text-xs text-gray-400 ml-2">(Precio público, costo = precio / 1.30, utilidad 30%)</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="cerrarPreviewPDF()" class="px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 btn-press text-sm">Cancelar</button>
+                        <button onclick="confirmarImportPDF()" id="btn-confirm-pdf" class="px-4 py-2 rounded-lg bg-brand-600 text-white font-semibold hover:bg-brand-700 btn-press text-sm flex items-center gap-2"><i class="fa-solid fa-check"></i> Confirmar Importación</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1494,7 +1545,7 @@
         }
 
         async function sendImport(data, label) {
-            if (!confirm(`¿Importar ${label}? Se reemplazarán todos los productos actuales.`)) return;
+            if (!confirm(`¿Importar ${label}? Se borrarán los productos actuales de la lista ${currentList.toUpperCase()} y se insertarán los nuevos.`)) return;
             try {
                 const res = await api('/api/productos/import', {
                     method: 'POST',
@@ -1509,6 +1560,120 @@
                     showToast(result.error || 'Error al importar', true);
                 }
             } catch { showToast('Error de conexión al importar', true); }
+        }
+
+        // ── PDF Import / Export ──
+        let pdfImportData = null;
+
+        function importPDF(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            fetch('/api/productos/import-pdf', {
+                method: 'POST',
+                headers: { ...authHeaders() },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) { showToast(data.error, true); return; }
+                if (!data.products || !data.products.length) { showToast('No se encontraron productos en el PDF', true); return; }
+                pdfImportData = data;
+                mostrarPreviewPDF(data);
+            })
+            .catch(err => showToast('Error al procesar PDF: ' + err.message, true));
+            e.target.value = '';
+        }
+
+        function mostrarPreviewPDF(data) {
+            const tbody = document.getElementById('pdf-preview-table-body');
+            const info = document.getElementById('pdf-preview-info');
+            const count = document.getElementById('pdf-preview-count');
+            info.innerHTML = `<span class="bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 px-2 py-0.5 rounded-full font-semibold">${data.tipo === 'mayor' ? 'MAYOR' : 'DETAL'}</span> <span>${data.count} productos extraídos</span>`;
+            count.textContent = `${data.count} productos`;
+            tbody.innerHTML = data.products.map((p, i) => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-dark-rowHover">
+                    <td class="px-2 py-1.5 text-gray-500 dark:text-gray-400 font-mono">${i + 1}</td>
+                    <td class="px-2 py-1.5 font-medium text-gray-800 dark:text-white">${escapeHtml(p.nombre)}</td>
+                    <td class="px-2 py-1.5 text-gray-600 dark:text-gray-300">${escapeHtml(p.categoria)}</td>
+                    <td class="px-2 py-1.5 text-gray-500 dark:text-gray-400">${escapeHtml(p.empaque || '')}</td>
+                    <td class="px-2 py-1.5 text-gray-500 dark:text-gray-400">${escapeHtml(p.presentacion || '')}</td>
+                    <td class="px-2 py-1.5 text-right font-semibold text-green-600 dark:text-green-400">${(p.precio || 0).toFixed(2)}</td>
+                </tr>
+            `).join('');
+            document.getElementById('pdf-preview-modal').classList.remove('hidden');
+        }
+
+        function cerrarPreviewPDF() {
+            document.getElementById('pdf-preview-modal').classList.add('hidden');
+            pdfImportData = null;
+        }
+
+        async function confirmarImportPDF() {
+            if (!pdfImportData) return;
+            const btn = document.getElementById('btn-confirm-pdf');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importando...';
+            try {
+                const res = await api('/api/productos/import-pdf/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tipo: pdfImportData.tipo, products: pdfImportData.products })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    showToast(`Importados ${result.count} productos`);
+                    cerrarPreviewPDF();
+                    await loadProducts();
+                    getCategorias();
+                } else {
+                    showToast(result.error || 'Error al confirmar', true);
+                }
+            } catch { showToast('Error de conexión', true); }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar Importación';
+        }
+
+        function exportProductosPDF() {
+            if (!products.length) { showToast('No hay productos para exportar', true); return; }
+            const w = window.open('', '_blank');
+            if (!w) { alert('Permite ventanas emergentes'); return; }
+            const titulo = currentList === 'mayor' ? 'Lista de Precios - MAYOR' : 'Lista de Precios - DETAL';
+            const rows = products.map((p, i) => `
+                <tr>
+                    <td style="padding:5px 8px;text-align:center">${i + 1}</td>
+                    <td style="padding:5px 8px">${escapeHtml(p.nombre)}</td>
+                    <td style="padding:5px 8px">${escapeHtml(p.categoria)}</td>
+                    <td style="padding:5px 8px">${escapeHtml(p.empaque || '')}</td>
+                    <td style="padding:5px 8px">${escapeHtml(p.presentacion || '')}</td>
+                    <td style="padding:5px 8px;text-align:right">$${calcPublicPrice(p).toFixed(2)}</td>
+                </tr>
+            `).join('');
+            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${titulo} - Distribuidora BF</title>
+            <style>
+                *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+                body{padding:30px;color:#1a1a1a;max-width:1000px;margin:0 auto;font-size:12px}
+                h1{font-size:20px;color:#c9521b;margin-bottom:2px}
+                .sub{color:#666;font-size:12px;margin-bottom:20px}
+                table{width:100%;border-collapse:collapse}
+                th{background:#c9521b;color:white;padding:7px 8px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px}
+                th:nth-child(6){text-align:right}
+                td{border-bottom:1px solid #e2e8f0;font-size:11px}
+                tr:nth-child(even) td{background:#f9f9f9}
+                .footer{margin-top:20px;text-align:center;color:#999;font-size:10px;border-top:1px solid #e2e8f0;padding-top:10px}
+                @media print{body{padding:15px}}
+            </style></head><body>
+            <h1>Distribuidora BF</h1>
+            <p class="sub">${titulo} | ${new Date().toLocaleDateString('es-VE')} | ${products.length} producto(s)</p>
+            <table>
+                <thead><tr><th style="width:30px;text-align:center">#</th><th>Producto</th><th>Categoría</th><th>Empaque</th><th>Presentación</th><th style="text-align:right">Precio Público</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="footer">Distribuidora BF — +58 414-4396707 | Generado desde el Panel Admin</div>
+            <script>window.print();<\/script></body></html>`;
+            w.document.write(html);
+            w.document.close();
         }
 
         function downloadFile(content, filename, mime) {
