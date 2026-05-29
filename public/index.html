@@ -106,6 +106,8 @@
                     <div id="brand-tagline" class="text-[10px] md:text-xs text-gray-400 dark:text-gray-500 ml-1 mt-0.5 font-medium tracking-wide">Especias</div>
                 </div>
                 <div class="flex items-center space-x-2">
+                    <button onclick="document.getElementById('footer-contact').scrollIntoView({behavior:'smooth'})" title="Contactos"
+                        class="min-touch text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 text-sm rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 px-3"><i class="fa-solid fa-address-card mr-1"></i><span class="hide-mobile">Contactos</span></button>
                     <a href="/admin.html" title="Admin"
                         class="text-gray-300 dark:text-gray-500 hover:text-brand-600 text-xs opacity-30 hover:opacity-100 transition-all min-touch rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i
                             class="fa-solid fa-lock"></i></a>
@@ -1023,7 +1025,7 @@ if (currentView === 'grid') {
                         Distribución de especias, condimentos, granos, químicos y productos alimenticios para comercios y hogares. Mayor y detal.
                     </p>
                 </div>
-                <div class="flex flex-col items-center">
+                <div id="footer-contact" class="flex flex-col items-center">
                     <h4 class="text-white font-semibold mb-4 flex items-center justify-center">
                         <i class="fa-solid fa-phone text-brand-500 mr-2 text-sm"></i> Contacto
                     </h4>
@@ -1034,7 +1036,7 @@ if (currentView === 'grid') {
                             </a>
                         </li>
                         <li>
-                            <a href="https://wa.me/584144396707" target="_blank" class="flex items-center justify-center text-gray-400 hover:text-brand-400 transition-colors">
+                            <a href="https://wa.me/584144396707?text=Hola%20Distribuidora%20BF%2C%20quiero%20informaci%C3%B3n%20sobre%20sus%20productos" target="_blank" class="flex items-center justify-center text-gray-400 hover:text-brand-400 transition-colors">
                                 <i class="fa-brands fa-whatsapp mr-3 w-4 text-green-500"></i> WhatsApp
                             </a>
                         </li>
