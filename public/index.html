@@ -60,6 +60,7 @@
             animation: taglineFade 3s ease-in-out infinite;
         }
 
+
         @media (prefers-reduced-motion: reduce) {
             .spice-particle { display: none !important; }
             .brand-tilt { transform: none !important; }
@@ -923,15 +924,19 @@ if (currentView === 'grid') {
         (function() {
             const el = document.getElementById('brand-tagline');
             if (!el) return;
-            const phrases = ['Especias', 'Condimentos', 'Granos', 'Frutos Secos', 'Químicos', 'Colorantes', 'Esencias'];
+            const cats = ['Especias', 'Condimentos', 'Granos', 'Frutos Secos', 'Químicos', 'Colorantes', 'Esencias'];
+            const groups = [];
+            for (let i = 0; i < cats.length; i++) {
+                groups.push(cats[i] + ' · ' + cats[(i+1)%cats.length] + ' · ' + cats[(i+2)%cats.length]);
+            }
             let idx = 0;
             el.classList.add('cycling');
             setInterval(() => {
-                idx = (idx + 1) % phrases.length;
+                idx = (idx + 1) % groups.length;
                 el.style.opacity = '0';
                 el.style.transform = 'translateY(4px)';
                 setTimeout(() => {
-                    el.textContent = phrases[idx];
+                    el.textContent = groups[idx];
                     el.style.opacity = '1';
                     el.style.transform = 'translateY(0)';
                 }, 350);
