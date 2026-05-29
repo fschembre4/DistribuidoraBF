@@ -189,28 +189,17 @@
 
                 <div class="table-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
                     <table class="w-full text-sm" style="table-layout:fixed">
-                        <colgroup>
-                            <col class="hidden md:table-cell" style="width:50px">
-                            <col style="min-width:120px;width:auto">
-                            <col class="hidden lg:table-cell" style="width:100px">
-                            <col class="hidden md:table-cell" style="width:80px">
-                            <col class="hidden md:table-cell" style="width:80px">
-                            <col class="hidden lg:table-cell" style="width:50px">
-                            <col style="width:80px">
-                            <col class="hidden md:table-cell" style="width:65px">
-                            <col style="width:85px">
-                        </colgroup>
                         <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
                             <tr>
-                                <th class="px-4 py-3 text-left hidden md:table-cell">ID</th>
-                                <th class="px-4 py-3 text-left">Nombre</th>
-                                <th class="px-4 py-3 text-left hidden lg:table-cell">Categoría</th>
-                                <th class="px-4 py-3 text-left hidden md:table-cell">Empaque</th>
-                                <th class="px-4 py-3 text-right hidden md:table-cell">Costo</th>
-                                <th class="px-4 py-3 text-right hidden lg:table-cell">%</th>
-                                <th class="px-4 py-3 text-right">Precio</th>
-                                <th class="px-4 py-3 text-center hidden md:table-cell">Activo</th>
-                                <th class="px-4 py-3 text-center">Acción</th>
+                                <th class="px-4 py-3 text-left hidden md:table-cell" style="width:50px">ID</th>
+                                <th class="px-4 py-3 text-left" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nombre</th>
+                                <th class="px-4 py-3 text-left hidden lg:table-cell" style="width:100px">Categoría</th>
+                                <th class="px-4 py-3 text-left hidden md:table-cell" style="width:80px">Empaque</th>
+                                <th class="px-4 py-3 text-right hidden md:table-cell" style="width:80px">Costo</th>
+                                <th class="px-4 py-3 text-right hidden lg:table-cell" style="width:50px">%</th>
+                                <th class="px-4 py-3 text-right" style="width:80px">Precio</th>
+                                <th class="px-4 py-3 text-center hidden md:table-cell" style="width:60px">Activo</th>
+                                <th class="px-4 py-3 text-center" style="width:85px">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="products-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
@@ -798,11 +787,11 @@
                     <td class="px-4 py-3 text-center">
                         <div class="flex items-center justify-center gap-1 sm:gap-1.5">
                             <button onclick="openEditModal(${p.id})" title="Editar"
-                                class="w-9 h-9 sm:w-11 sm:h-11 inline-flex items-center justify-center text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/30 rounded-lg text-xs sm:text-sm shrink-0">
+                                class="w-8 h-8 sm:w-10 sm:h-10 inline-flex items-center justify-center text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/30 rounded-lg text-xs shrink-0">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
                             <button onclick="deleteProduct(${p.id})" title="Eliminar"
-                                class="w-9 h-9 sm:w-11 sm:h-11 inline-flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-xs sm:text-sm shrink-0">
+                                class="w-8 h-8 sm:w-10 sm:h-10 inline-flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-xs shrink-0">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
