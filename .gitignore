@@ -6,3 +6,7 @@ server-test.log
 productos_mayor.json
 productos_detal.json
 ListasCostos/
+*_supabase.json
+audit_*.js
+compare_*.js
+fetch_*.js
