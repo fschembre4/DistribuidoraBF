@@ -107,10 +107,7 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     <button onclick="document.getElementById('footer-contact').scrollIntoView({behavior:'smooth'})" title="Contactos"
-                        class="min-touch text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 text-sm rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 px-3"><i class="fa-solid fa-address-card mr-1"></i><span class="hide-mobile">Contactos</span></button>
-                    <a href="/admin.html" title="Admin"
-                        class="text-gray-300 dark:text-gray-500 hover:text-brand-600 text-xs opacity-30 hover:opacity-100 transition-all min-touch rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i
-                            class="fa-solid fa-lock"></i></a>
+                        class="min-touch text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 text-sm rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 px-3">Contactos</button>
                     <div class="hidden sm:flex bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 text-xs font-semibold">
                         <button onclick="setListMode('mayor')" id="list-mayor"
                             class="min-touch px-3 py-1.5 rounded-full bg-brand-600 text-white btn-press">Mayor</button>
@@ -1049,6 +1046,7 @@ if (currentView === 'grid') {
                     <ul class="space-y-3 text-sm">
                         <li><a href="#" onclick="document.querySelector('.container.mx-auto.px-4.py-4').scrollIntoView({behavior:'smooth'}); return false" class="text-gray-400 hover:text-brand-400 transition-colors">Catálogo</a></li>
                         <li><a href="#faq" class="text-gray-400 hover:text-brand-400 transition-colors">Preguntas Frecuentes</a></li>
+                        <li class="mt-4"><a href="/admin.html" class="text-gray-700 hover:text-gray-500 transition-colors text-xs flex items-center justify-center"><i class="fa-solid fa-lock mr-1 opacity-50"></i><span class="opacity-40">Admin</span></a></li>
                     </ul>
                 </div>
             </div>
