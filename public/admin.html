@@ -188,18 +188,18 @@
                 </div>
 
                 <div class="table-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm" style="table-layout:fixed">
                         <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
                             <tr>
-                                <th class="px-4 py-3 text-left hidden md:table-cell">ID</th>
-                                <th class="px-4 py-3 text-left">Nombre</th>
-                                <th class="px-4 py-3 text-left hidden lg:table-cell">Categoría</th>
-                                <th class="px-4 py-3 text-left hidden md:table-cell">Empaque</th>
-                                <th class="px-4 py-3 text-right hidden md:table-cell">Costo</th>
-                                <th class="px-4 py-3 text-right hidden lg:table-cell">%</th>
-                                <th class="px-4 py-3 text-right">Precio</th>
-                                <th class="px-4 py-3 text-center hidden md:table-cell">Activo</th>
-                                <th class="px-4 py-3 text-center">Acción</th>
+                                <th class="px-4 py-3 text-left hidden md:table-cell" style="width:50px">ID</th>
+                                <th class="px-4 py-3 text-left" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px">Nombre</th>
+                                <th class="px-4 py-3 text-left hidden lg:table-cell" style="width:120px">Categoría</th>
+                                <th class="px-4 py-3 text-left hidden md:table-cell" style="width:95px">Empaque</th>
+                                <th class="px-4 py-3 text-right hidden md:table-cell" style="width:90px">Costo</th>
+                                <th class="px-4 py-3 text-right hidden lg:table-cell" style="width:50px">%</th>
+                                <th class="px-4 py-3 text-right" style="width:90px">Precio</th>
+                                <th class="px-4 py-3 text-center hidden md:table-cell" style="width:60px">Activo</th>
+                                <th class="px-4 py-3 text-center" style="width:95px">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="products-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
@@ -744,7 +744,7 @@
             tbody.innerHTML = items.map(p => `
                 <tr class="hover:bg-gray-50 dark:hover:bg-dark-rowHover ${!p.disponible ? 'opacity-60' : ''}" data-id="${p.id}">
                     <td class="hidden md:table-cell px-4 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">#${p.id}</td>
-                    <td class="px-4 py-3" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                    <td class="px-4 py-3" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0">
                         <span class="font-medium text-gray-800 dark:text-white">${escapeHtml(p.nombre)}</span>
                         ${p.etiqueta ? `<span class="ml-2 text-xs px-2 py-0.5 rounded-full ${p.etiqueta === 'Nuevo' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${p.etiqueta}</span>` : ''}
                         <span class="block sm:hidden text-xs text-gray-400 mt-0.5">${escapeHtml(p.categoria)}${!p.disponible ? ' · Agotado' : ''}</span>
