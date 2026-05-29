@@ -6,9 +6,12 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const multer = require('multer');
-const { PDFParse, VerbosityLevel } = require('pdf-parse');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+let multer, PDFParse, VerbosityLevel, upload;
+function loadPDFDeps() {
+  if (!multer) multer = require('multer');
+  if (!PDFParse) { const p = require('pdf-parse'); PDFParse = p.PDFParse; VerbosityLevel = p.VerbosityLevel; }
+  if (!upload) upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -339,7 +342,7 @@ function parsePDFProducts(text) {
   return { products, tipo: listType };
 }
 
-app.post('/api/productos/import-pdf', upload.single('file'), async (req, res) => {
+app.post('/api/productos/import-pdf', (req, res, next) => { try { loadPDFDeps(); next(); } catch { res.status(500).json({ error: 'Dependencias PDF no disponibles' }); } }, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'Sube un archivo PDF' });
     const pdf = new PDFParse({ data: req.file.buffer, verbosity: VerbosityLevel.ERRORS });
