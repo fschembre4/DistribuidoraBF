@@ -302,13 +302,51 @@ app.put('/api/config', async (req, res) => {
 
 // ─── Diferencial / Tasas ─────────────────────────────────────────────────────
 
-async function fetchTasas() {
-  const response = await fetch('https://ve.dolarapi.com/v1/dolares');
-  const tasas = await response.json();
+async function fetchDolarApi() {
+  const res = await fetch('https://ve.dolarapi.com/v1/dolares', { signal: AbortSignal.timeout(8000) });
+  const tasas = await res.json();
   const oficial = tasas.find(t => t.fuente === 'oficial')?.promedio;
   const paralelo = tasas.find(t => t.fuente === 'paralelo')?.promedio;
-  if (!oficial || !paralelo) throw new Error('No se pudieron obtener las tasas');
+  if (!oficial || !paralelo) throw new Error('dolarapi: tasas incompletas');
   return { oficial, paralelo };
+}
+
+async function fetchBinanceP2P() {
+  const res = await fetch('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', {
+    method: 'POST',
+    signal: AbortSignal.timeout(8000),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ asset: 'USDT', fiat: 'VES', tradeType: 'SELL', page: 1, rows: 10, payTypes: [], publisherType: null })
+  });
+  const data = await res.json();
+  const ads = data.data || [];
+  if (ads.length === 0) throw new Error('binance: sin anuncios');
+  const prices = ads.map(a => parseFloat(a.adv.price)).filter(p => p > 0);
+  if (prices.length === 0) throw new Error('binance: precios inválidos');
+  return prices.reduce((a, b) => a + b, 0) / prices.length;
+}
+
+async function fetchBcvRafnxg() {
+  const res = await fetch('https://bcv-api.rafnixg.dev/v1/exchange-rates/latest/USD', { signal: AbortSignal.timeout(8000) });
+  const data = await res.json();
+  const rate = parseFloat(data.rate);
+  if (!rate || rate <= 0) throw new Error('rafnxg: tasa inválida');
+  return rate;
+}
+
+async function fetchTasas() {
+  let lastError;
+  // Tier 1: dolarapi (da ambas tasas)
+  try {
+    return await fetchDolarApi();
+  } catch (e) { lastError = e; }
+
+  // Tier 2: fallback individual
+  let oficial, paralelo;
+  try { oficial = await fetchBcvRafnxg(); } catch (e) { lastError = e; }
+  try { paralelo = await fetchBinanceP2P(); } catch (e) { lastError = e; }
+  if (oficial && paralelo) return { oficial, paralelo, fallback: true };
+  throw lastError || new Error('No se pudieron obtener las tasas');
 }
 
 async function fetchAndSaveTasas() {
@@ -362,10 +400,10 @@ function iniciarAutoUpdate() {
 
 app.get('/api/diferencial/calcular', async (req, res) => {
   try {
-    const { oficial, paralelo } = await fetchTasas();
-    res.json({ oficial, paralelo, tasa_bcv: oficial });
+    const result = await fetchTasas();
+    res.json({ ...result, tasa_bcv: result.oficial });
   } catch {
-    res.status(502).json({ error: 'Error al conectar con el servicio de tasas' });
+    res.status(502).json({ error: 'Error al conectar con servicios de tasas' });
   }
 });
 
