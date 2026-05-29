@@ -155,33 +155,33 @@
         </header>
 
         <div class="bg-gray-100 dark:bg-gray-900 shadow-md">
-            <div class="container mx-auto px-4 py-4 flex items-center gap-1.5 sm:gap-2 overflow-hidden">
+            <div class="container mx-auto px-4 py-4 flex items-center gap-2 sm:gap-3 overflow-hidden">
                 <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Buscar producto..."
-                    class="flex-[1_1_65%] sm:flex-1 min-w-0 px-2 sm:px-4 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
-                <div class="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+                    class="flex-1 min-w-0 px-3 sm:px-5 py-2.5 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white text-sm">
+                <div class="flex items-center gap-1 sm:gap-2 shrink-0">
                     <button onclick="sortProducts('price')" id="sort-price" title="Ordenar por precio"
-                        class="min-h-[44px] px-2 sm:px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                        class="min-h-[44px] px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
                             class="fa-solid fa-arrow-up-short-wide text-xs"></i></button>
                     <button onclick="sortProducts('alpha')" id="sort-alpha" title="Ordenar alfabético"
-                        class="min-h-[44px] px-2 sm:px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                        class="min-h-[44px] px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
                             class="fa-solid fa-arrow-up-a-z text-xs"></i></button>
                 </div>
                 <select id="view-select" onchange="setView(this.value)"
-                    class="sm:hidden px-1.5 py-1.5 border dark:border-gray-600 rounded text-xs bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 shrink-0">
+                    class="sm:hidden px-2 py-2 border dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 shrink-0">
                     <option value="list">Lista</option>
                     <option value="grid">Cuadro</option>
                     <option value="table">Tabla</option>
                 </select>
                 <div class="hidden sm:flex bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 gap-0.5 shrink-0">
                     <button onclick="setView('grid')" id="btn-grid"
-                        class="view-btn min-touch p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"><i
-                            class="fa-solid fa-grip"></i></button>
+                        class="view-btn min-touch px-3 py-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm flex items-center"><i
+                            class="fa-solid fa-grip mr-1.5"></i>Cuadro</button>
                     <button onclick="setView('list')" id="btn-list"
-                        class="view-btn min-touch p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"><i
-                            class="fa-solid fa-list"></i></button>
+                        class="view-btn min-touch px-3 py-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm flex items-center"><i
+                            class="fa-solid fa-list mr-1.5"></i>Lista</button>
                     <button onclick="setView('table')" id="btn-table"
-                        class="view-btn min-touch p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"><i
-                            class="fa-solid fa-table"></i></button>
+                        class="view-btn min-touch px-3 py-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm flex items-center"><i
+                            class="fa-solid fa-table mr-1.5"></i>Tabla</button>
                 </div>
             </div>
 
