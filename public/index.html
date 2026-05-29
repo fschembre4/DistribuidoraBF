@@ -94,7 +94,7 @@
 
     <div class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
         <header>
-            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="container mx-auto px-4 py-2.5 flex justify-between items-center">
                 <div id="brand-container" class="flex flex-col cursor-pointer select-none relative" onclick="location.reload()" title="Recargar catálogo">
                     <div id="brand-tilt" class="brand-tilt flex items-center">
                         <div class="brand-tilt-inner flex items-center">
@@ -132,7 +132,7 @@
                             class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span></button>
                 </div>
             </div>
-            <div class="sm:hidden container mx-auto px-4 pb-6 flex items-center justify-between">
+            <div class="sm:hidden container mx-auto px-4 pb-2 flex items-center justify-between">
                 <div></div>
                 <div class="flex space-x-3">
                     <div class="bg-gray-200 dark:bg-gray-700 rounded-full p-0.5 flex text-xs font-semibold">
@@ -155,15 +155,15 @@
         </header>
 
         <div class="bg-gray-100 dark:bg-gray-900 shadow-md">
-            <div class="container mx-auto px-4 py-3 flex items-center gap-2 sm:gap-3 overflow-hidden">
+            <div class="container mx-auto px-4 py-1.5 flex items-center gap-2 sm:gap-3 overflow-hidden">
                 <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="Buscar producto..."
-                    class="flex-1 min-w-0 px-3 sm:px-5 py-2.5 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white text-sm">
+                    class="flex-1 min-w-0 px-3 sm:px-5 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white text-sm">
                 <div class="flex items-center gap-1 sm:gap-2 shrink-0">
                     <button onclick="sortProducts('price')" id="sort-price" title="Ordenar por precio"
-                        class="min-h-[44px] px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                        class="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
                             class="fa-solid fa-arrow-up-short-wide text-xs"></i></button>
                     <button onclick="sortProducts('alpha')" id="sort-alpha" title="Ordenar alfabético"
-                        class="min-h-[44px] px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
+                        class="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"><i
                             class="fa-solid fa-arrow-up-a-z text-xs"></i></button>
                 </div>
                 <select id="view-select" onchange="setView(this.value)"
@@ -185,9 +185,9 @@
                 </div>
             </div>
 
-            <div class="container mx-auto px-4 pb-2 sm:pb-3">
+            <div class="container mx-auto px-4 pb-1.5 sm:pb-3">
                 <select id="category-select" onchange="setCategory(this.value)"
-                    class="w-full sm:hidden px-4 py-3 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white appearance-none">
+                    class="w-full sm:hidden px-4 py-2 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white appearance-none">
                     <option value="Todos">Todas las categorías</option>
                 </select>
                 <div id="cat-buttons-mayor" class="hidden sm:flex flex-wrap gap-2">
