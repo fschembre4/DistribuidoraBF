@@ -403,30 +403,29 @@
 
             if (currentView === 'table') {
                 let tableHtml = `<div class="bg-white dark:bg-gray-800 rounded-lg shadow" style="max-height:calc(100vh - 200px);overflow:auto"><table class="w-full text-sm" style="table-layout:fixed"><thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider sticky top-0 z-10"><tr>
-                    <th class="hidden sm:table-cell px-3 py-3 text-left font-medium w-10">#</th>
-                    <th class="px-3 py-3 text-left font-medium w-[55%] sm:w-auto">Nombre</th>
-                    <th class="hidden sm:table-cell px-3 py-3 text-left font-medium">Empaque</th>
-                    <th class="hidden sm:table-cell px-3 py-3 text-left font-medium">Presentación</th>
-                    <th class="hidden md:table-cell px-3 py-3 text-left font-medium w-24">Categoría</th>
-                    <th class="px-3 py-3 text-right font-medium w-[25%] sm:w-24">Precio</th>
-                    <th class="px-3 py-3 text-center font-medium w-14">Agregar</th>
+                    <th class="hidden sm:table-cell px-2 py-3 text-left font-medium" style="width:40px">#</th>
+                    <th class="px-2 py-3 text-left font-medium" style="width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nombre</th>
+                    <th class="px-2 py-3 text-left font-medium" style="width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Empaque</th>
+                    <th class="px-2 py-3 text-left font-medium" style="width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Pres.</th>
+                    <th class="hidden md:table-cell px-2 py-3 text-left font-medium" style="width:90px">Categoría</th>
+                    <th class="px-2 py-3 text-right font-medium" style="width:75px">Precio</th>
+                    <th class="px-2 py-3 text-center font-medium" style="width:50px"></th>
                 </tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
                 filteredProducts.forEach(p => {
                     const isDisabled = !p.disponible;
                     const opacityClass = isDisabled ? "opacity-60" : "";
-                    const priceCol = pricingMode === 'DIVISA'
-                        ? `$${getPublicPrice(p).toFixed(2)}`
-                        : `$${getBcvUsdPrice(p).toFixed(2)} <span class="text-gray-400">| Bs. ${formatBs(getBsPrice(p))}</span>`;
+                    const priceUsd = pricingMode === 'DIVISA' ? getPublicPrice(p).toFixed(2) : getBcvUsdPrice(p).toFixed(2);
+                    const priceBs = pricingMode === 'BCV' ? getBsPrice(p) : 0;
                     const label = p.etiqueta ? (p.etiqueta === 'Nuevo' ? ' 🟢Nuevo' : ' 🔴Oferta') : '';
                     tableHtml += `<tr class="hover:bg-gray-50 dark:hover:bg-dark-rowHover ${opacityClass}">
-                        <td class="hidden sm:table-cell px-3 py-2.5 text-xs text-gray-400 font-mono">#${p.id}</td>
-                        <td class="px-3 py-2.5 text-sm font-medium text-gray-800 dark:text-white">${p.nombre}${label}</td>
-                        <td class="hidden sm:table-cell px-3 py-2.5 text-xs">${p.empaque ? `<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">${p.empaque}</span>` : '<span class="text-gray-400">—</span>'}</td>
-                        <td class="hidden sm:table-cell px-3 py-2.5 text-xs text-gray-500 dark:text-gray-400">${p.presentacion}</td>
-                        <td class="hidden md:table-cell px-3 py-2.5 text-xs"><span class="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400 px-2 py-0.5 rounded-full">${p.categoria}</span></td>
-                        <td class="px-3 py-2.5 text-sm font-semibold text-price-light dark:text-price-dark text-right">${priceCol}</td>
-                        <td class="px-3 py-2.5 text-center">
-                            ${isDisabled ? '<span class="text-xs text-red-400">Agotado</span>' : `<button onclick="openModal(${p.id})" class="min-touch bg-brand-600 text-white w-10 h-10 rounded-full hover:bg-brand-700 text-sm flex items-center justify-center mx-auto btn-press"><i class="fa-solid fa-plus"></i></button>`}
+                        <td class="hidden sm:table-cell px-2 py-2.5 text-xs text-gray-400 font-mono">#${p.id}</td>
+                        <td class="px-2 py-2.5 text-sm font-medium text-gray-800 dark:text-white" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nombre}${label}</td>
+                        <td class="px-2 py-2.5 text-xs" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.empaque ? `<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-medium">${p.empaque}</span>` : '<span class="text-gray-400">—</span>'}</td>
+                        <td class="px-2 py-2.5 text-xs text-gray-500 dark:text-gray-400" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.presentacion}</td>
+                        <td class="hidden md:table-cell px-2 py-2.5 text-xs"><span class="bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400 px-1.5 py-0.5 rounded">${p.categoria}</span></td>
+                        <td class="px-2 py-2.5 text-sm font-semibold text-price-light dark:text-price-dark text-right" style="white-space:nowrap">$${priceUsd}${priceBs ? `<br><span class="text-xs text-gray-400">Bs. ${formatBs(priceBs)}</span>` : ''}</td>
+                        <td class="px-2 py-2.5 text-center">
+                            ${isDisabled ? '<span class="text-xs text-red-400 whitespace-nowrap">Agotado</span>' : `<button onclick="openModal(${p.id})" class="bg-brand-600 text-white rounded-full hover:bg-brand-700 text-xs flex items-center justify-center mx-auto btn-press shrink-0" style="width:36px;height:36px"><i class="fa-solid fa-plus"></i></button>`}
                         </td>
                     </tr>`;
                 });
