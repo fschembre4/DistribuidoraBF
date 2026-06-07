@@ -367,7 +367,7 @@ async function fetchAndSaveTasas() {
   return { oficial, paralelo, tasa_bcv: oficial, diferencial: data.diferencial, ultima_actualizacion: data.ultima_actualizacion };
 }
 
-const AUTO_HOURS_VET = [6, 10, 14, 18, 22, 2];
+const AUTO_HOURS_VET = [6, 14, 22];
 
 function iniciarAutoUpdate() {
   const checkInterval = setInterval(async () => {
@@ -574,13 +574,14 @@ app.put('/api/pedidos/:id/estado', async (req, res) => {
 
 // ─── Start ───────────────────────────────────────────────────────────────────
 
+iniciarAutoUpdate();
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
     console.log(`Catálogo: http://localhost:${PORT}`);
     console.log(`Admin:    http://localhost:${PORT}/admin.html`);
-    iniciarAutoUpdate();
-    console.log(`[Auto] Actualización programada cada 4h (VET: ${AUTO_HOURS_VET.join(', ')}:00)`);
+    console.log(`[Auto] Actualización programada cada 8h (VET: ${AUTO_HOURS_VET.join(', ')}:00)`);
   });
 }
 
